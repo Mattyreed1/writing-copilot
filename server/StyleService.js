@@ -1,7 +1,23 @@
 function getWriterStyles() {
-    // This would typically fetch from a database or external service
-    return ['Ernest Hemingway', 'Virginia Woolf', 'Gabriel García Márquez', 'Toni Morrison'];
-  }
-  
-  // ... other style-related functions
-  
+    return [
+        'Paul Graham',
+        'Seth Godin',
+        'James Clear',
+        'Sam Harris'
+    ];
+}
+
+function getWritingStyles() {
+    return [
+        'Concise',
+        'Witty',
+        'Humorous',
+        'Creative',
+        'Sarcastic',
+        'Conversational',
+        'Persuasive',
+        'Narrative'
+    ];
+}
+
+// ... other style-related functions

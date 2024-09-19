@@ -3,6 +3,7 @@
   <head>
     <base target="_top">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <?!= include('ui/CSS'); ?>
   </head>
   <body>
@@ -10,9 +11,14 @@
       <h1>Writing Copilot</h1>
       
       <div id="writer-style-section">
-        <h2>Writer Style</h2>
-        <select id="writer-style-select">
-          <option value="">Select a style...</option>
+        <h2>Writer Styles</h2>
+        <select id="writer-style-select" multiple="multiple">
+        </select>
+      </div>
+
+      <div id="writing-style-section">
+        <h2>Writing Styles</h2>
+        <select id="writing-style-select" multiple="multiple">
         </select>
       </div>
 
@@ -33,25 +39,40 @@
       $(function() {
         console.log('Sidebar loaded');
         
+        // Initialize Select2
+        $('#writer-style-select, #writing-style-select').select2();
+
         // Load writer styles
         google.script.run.withSuccessHandler(function(styles) {
           var select = $('#writer-style-select');
           styles.forEach(function(style) {
             select.append($('<option></option>').val(style).text(style));
           });
+          select.trigger('change');
         }).getWriterStyles();
+
+        // Load writing styles
+        google.script.run.withSuccessHandler(function(styles) {
+          var select = $('#writing-style-select');
+          styles.forEach(function(style) {
+            select.append($('<option></option>').val(style).text(style));
+          });
+          select.trigger('change');
+        }).getWritingStyles();
 
         // Get suggestions button click handler
         $('#get-suggestions').click(function() {
-          var selectedStyle = $('#writer-style-select').val();
-          if (!selectedStyle) {
-            alert('Please select a writer style first.');
+          var selectedWriters = $('#writer-style-select').val();
+          var selectedStyles = $('#writing-style-select').val();
+          
+          if (!selectedWriters.length || !selectedStyles.length) {
+            alert('Please select at least one writer style and one writing style.');
             return;
           }
           
           google.script.run.withSuccessHandler(function(suggestion) {
             $('#suggestions-output').text(suggestion);
-          }).getSuggestion(selectedStyle);
+          }).getSuggestion(selectedWriters, selectedStyles);
         });
 
         // Find citations button click handler
@@ -66,5 +87,8 @@
       });
     </script>
 
+    <?!= include('client/main'); ?>
+    <?!= include('client/editorInteractions'); ?>
+    <?!= include('client/aiRequests'); ?>
   </body>
 </html>
