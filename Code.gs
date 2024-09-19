@@ -1,3 +1,7 @@
+/**
+ * @OnlyCurrentDoc
+ */
+
 function onOpen(e) {
   DocumentApp.getUi()
     .createAddonMenu()
@@ -33,6 +37,10 @@ function getSelectedText() {
 function insertText(text, index) {
   var body = DocumentApp.getActiveDocument().getBody();
   body.insertParagraph(index, text);
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 // ... other functions for interacting with the document
