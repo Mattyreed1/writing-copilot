@@ -14,9 +14,9 @@ if (typeof jQuery != 'undefined') {
 function onLoad() {
   console.log('Sidebar loaded');
   
-  $('#edit-btn').click(() => handleAIOperation('edit'));
-  $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
-  $('#continue-btn').click(() => handleAIOperation('continue'));
+  $('#ai-suggestions #edit-btn').click(() => handleAIOperation('edit'));
+  $('#ai-suggestions #rewrite-btn').click(() => handleAIOperation('rewrite'));
+  $('#ai-suggestions #continue-btn').click(() => handleAIOperation('continue'));
 }
 
 function handleAIOperation(operation) {
