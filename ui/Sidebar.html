@@ -3,27 +3,10 @@
   <head>
     <base target="_top">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   </head>
   <body>
-    <select id="styleSelect"></select>
-    
-    <script>
-      $(function() {
-        function populateStyles(styles) {
-          var select = $('#styleSelect');
-          styles.forEach(function(style) {
-            select.append(new Option(style, style));
-          });
-          
-          select.select2({
-            placeholder: "Select writing styles",
-            allowClear: true
-          });
-        }
+    <!-- Your HTML content here -->
 
-        google.script.run.withSuccessHandler(populateStyles).getWriterStyles();
-      });
-    </script>
+    <?!= include('client/main'); ?>
   </body>
 </html>
