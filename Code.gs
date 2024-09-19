@@ -43,4 +43,14 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('ui/Sidebar')
+      .setTitle('My Add-on Sidebar');
+}
+
+function getWriterStyles() {
+  // Your server-side logic to get styles
+  return ['Style1', 'Style2', 'Style3'];
+}
+
 // ... other functions for interacting with the document
