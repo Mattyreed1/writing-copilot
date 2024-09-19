@@ -18,7 +18,7 @@ function showSidebarFromMenu() {
 }
 
 function showSidebar() {
-  var html = HtmlService.createTemplateFromFile('ui/Sidebar')
+  var html = HtmlService.createTemplateFromFile('ui/Sidebar.html')
     .evaluate()
     .setTitle('Writing Copilot')
     .setWidth(300);
