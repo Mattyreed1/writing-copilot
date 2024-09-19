@@ -3,14 +3,66 @@
   <head>
     <base target="_top">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <?!= include('ui/CSS'); ?>
   </head>
   <body>
-    <!-- Your HTML content here -->
+    <div id="sidebar-content">
+      <h1>Writing Copilot</h1>
+      
+      <div id="writer-style-section">
+        <h2>Writer Style</h2>
+        <select id="writer-style-select">
+          <option value="">Select a style...</option>
+        </select>
+      </div>
+
+      <div id="ai-suggestions-section">
+        <h2>AI Suggestions</h2>
+        <button id="get-suggestions">Get Suggestions</button>
+        <div id="suggestions-output"></div>
+      </div>
+
+      <div id="citations-section">
+        <h2>Citations</h2>
+        <button id="find-citations">Find Citations</button>
+        <div id="citations-output"></div>
+      </div>
+    </div>
 
     <script>
       $(function() {
         console.log('Sidebar loaded');
-        // Your initialization code here
+        
+        // Load writer styles
+        google.script.run.withSuccessHandler(function(styles) {
+          var select = $('#writer-style-select');
+          styles.forEach(function(style) {
+            select.append($('<option></option>').val(style).text(style));
+          });
+        }).getWriterStyles();
+
+        // Get suggestions button click handler
+        $('#get-suggestions').click(function() {
+          var selectedStyle = $('#writer-style-select').val();
+          if (!selectedStyle) {
+            alert('Please select a writer style first.');
+            return;
+          }
+          
+          google.script.run.withSuccessHandler(function(suggestion) {
+            $('#suggestions-output').text(suggestion);
+          }).getSuggestion(selectedStyle);
+        });
+
+        // Find citations button click handler
+        $('#find-citations').click(function() {
+          google.script.run.withSuccessHandler(function(citations) {
+            var citationsHtml = citations.map(function(citation) {
+              return '<p>' + citation.title + ' by ' + citation.author + ' (' + citation.year + ')</p>';
+            }).join('');
+            $('#citations-output').html(citationsHtml);
+          }).findCitations();
+        });
       });
     </script>
 
