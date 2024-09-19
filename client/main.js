@@ -20,16 +20,26 @@ function onLoad() {
 }
 
 function handleAIOperation(operation) {
-  const selectedText = google.script.run.getSelectedText();
-  const writers = $('#writer-select').val();
-  const styles = $('#style-select').val();
-
+  var selectedWriters = $('#writer-style-select').select2('data').map(item => item.text);
+  var selectedStyles = $('#writing-style-select').select2('data').map(item => item.text);
+  
+  if (!selectedWriters.length || !selectedStyles.length) {
+    alert('Please select at least one writer style and one writing style.');
+    return;
+  }
+  
   $('#ai-result').text('Loading...');
-
-  google.script.run
-    .withSuccessHandler(displayAIResult)
-    .withFailureHandler(handleError)
-    .getAISuggestions(selectedText, writers, styles, operation);
+  
+  var selectedText = google.script.run.withSuccessHandler(function(text) {
+    google.script.run
+      .withSuccessHandler(function(suggestion) {
+        $('#ai-result').html(suggestion);
+      })
+      .withFailureHandler(function(error) {
+        $('#ai-result').text('Error: ' + error.message);
+      })
+      .getAISuggestions(text, selectedWriters, selectedStyles, operation);
+  }).getSelectedText();
 }
 
 function displayAIResult(result) {
