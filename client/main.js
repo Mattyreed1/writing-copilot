@@ -38,7 +38,7 @@ function handleAIOperation(operation) {
             $('#ai-result').html(suggestion);
           })
           .withFailureHandler(function(error) {
-            $('#ai-result').text('Error: ' + error.message);
+            $('#ai-result').text('Error: ' + error);
           })
           .getAISuggestions(text, selectedWriters, selectedStyles, operation);
       } else {
@@ -46,7 +46,7 @@ function handleAIOperation(operation) {
       }
     })
     .withFailureHandler(function(error) {
-      $('#ai-result').text('Error: ' + error.message);
+      $('#ai-result').text('Error: ' + error);
     })
     .getSelectedText();
 }

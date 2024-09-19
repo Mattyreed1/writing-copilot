@@ -1,8 +1,8 @@
 const OVERALL_PROMPT = "You are a writing editor with 30 years of experience writing and editing written content. You write intriguing introductions that hook readers by providing clear value and peaking their interest. You use engaging language to spark curiosity, ensuring that the writing draws readers in from the start. Throughout the text, you maintain a focus on clarity and brevity, trimming excess words and sharpening arguments. Your writing is clear and approachable such that even an 8th grader can understand you.";
 
 function getAISuggestions(text, writers, styles, operation) {
-  var writersString = writers.join(', ');
-  var stylesString = styles.join(', ');
+  var writersString = Array.isArray(writers) ? writers.join(', ') : writers;
+  var stylesString = Array.isArray(styles) ? styles.join(', ') : styles;
   
   var prompt = '';
   switch(operation) {
