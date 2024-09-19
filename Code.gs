@@ -1,13 +1,23 @@
 function onOpen(e) {
   DocumentApp.getUi()
     .createAddonMenu()
-    .addItem('Open Writing Copilot', 'showSidebar')
+    .addItem('Open Writing Copilot', 'showSidebarFromMenu')
     .addToUi();
 }
 
+function onInstall(e) {
+  onOpen(e);
+}
+
+function showSidebarFromMenu() {
+  showSidebar();
+}
+
 function showSidebar() {
-  var html = HtmlService.createHtmlOutputFromFile('ui/Sidebar')
-    .setTitle('Writing Copilot');
+  var html = HtmlService.createTemplateFromFile('ui/Sidebar')
+    .evaluate()
+    .setTitle('Writing Copilot')
+    .setWidth(300);
   DocumentApp.getUi().showSidebar(html);
 }
 
@@ -26,7 +36,3 @@ function insertText(text, index) {
 }
 
 // ... other functions for interacting with the document
-
-function onInstall(e) {
-  onOpen(e);
-}
