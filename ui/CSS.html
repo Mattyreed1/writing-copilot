@@ -1,20 +1,27 @@
-<style>
-  /* Your CSS styles here */
-  .select2-container {
-    width: 100% !important;
-    margin-bottom: 10px;
-  }
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
 
-  .select2-container--default .select2-selection--multiple {
-    border: 1px solid #aaa;
-    border-radius: 4px;
-  }
+.button-container button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
-  .select2-container--default .select2-selection--multiple .select2-selection__choice {
-    background-color: #e4e4e4;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-    padding: 2px 5px;
-  }
-</style>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+.button-container button:hover {
+  background-color: #45a049;
+}
+
+#ai-result {
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 4px;
+}

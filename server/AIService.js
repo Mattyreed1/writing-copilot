@@ -16,7 +16,7 @@ function getAISuggestions(text, writers, styles, operation) {
       prompt = `Continue the following text in the style of ${writersString}, maintaining ${stylesString} writing styles. Add approximately 100 words:\n\n${text}`;
       break;
     default:
-      prompt = `Analyze the following text in the style of ${writersString}, using ${stylesString} writing styles:\n\n${text}`;
+      return 'Invalid operation';
   }
 
   return callOpenAI(prompt);
@@ -60,3 +60,13 @@ function callOpenAI(prompt, model = 'gpt-4', maxTokens = 150) {
 }
 
 // ... other AI-related functions
+
+function getSelectedText() {
+  var doc = DocumentApp.getActiveDocument();
+  var selection = doc.getSelection();
+  if (selection) {
+    var elements = selection.getSelectedElements();
+    return elements.map(e => e.getElement().asText().getText()).join('\n');
+  }
+  return '';
+}
