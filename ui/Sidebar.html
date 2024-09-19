@@ -39,16 +39,13 @@
       $(function() {
         console.log('Sidebar loaded');
         
-        // Initialize Select2
-        $('#writer-style-select, #writing-style-select').select2();
-
         // Load writer styles
         google.script.run.withSuccessHandler(function(styles) {
           var select = $('#writer-style-select');
           styles.forEach(function(style) {
             select.append($('<option></option>').val(style).text(style));
           });
-          select.trigger('change');
+          select.select2();
         }).getWriterStyles();
 
         // Load writing styles
@@ -57,7 +54,7 @@
           styles.forEach(function(style) {
             select.append($('<option></option>').val(style).text(style));
           });
-          select.trigger('change');
+          select.select2();
         }).getWritingStyles();
 
         // Get suggestions button click handler

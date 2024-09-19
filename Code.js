@@ -49,8 +49,11 @@ function doGet() {
 }
 
 function getWriterStyles() {
-  // Your server-side logic to get styles
-  return ['Style1', 'Style2', 'Style3'];
+  return StyleService.getWriterStyles();
+}
+
+function getWritingStyles() {
+  return StyleService.getWritingStyles();
 }
 
 // ... other functions for interacting with the document
