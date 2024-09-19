@@ -30,16 +30,25 @@ function handleAIOperation(operation) {
   
   $('#ai-result').text('Loading...');
   
-  var selectedText = google.script.run.withSuccessHandler(function(text) {
-    google.script.run
-      .withSuccessHandler(function(suggestion) {
-        $('#ai-result').html(suggestion);
-      })
-      .withFailureHandler(function(error) {
-        $('#ai-result').text('Error: ' + error.message);
-      })
-      .getAISuggestions(text, selectedWriters, selectedStyles, operation);
-  }).getSelectedText();
+  google.script.run
+    .withSuccessHandler(function(text) {
+      if (text) {
+        google.script.run
+          .withSuccessHandler(function(suggestion) {
+            $('#ai-result').html(suggestion);
+          })
+          .withFailureHandler(function(error) {
+            $('#ai-result').text('Error: ' + error.message);
+          })
+          .getAISuggestions(text, selectedWriters, selectedStyles, operation);
+      } else {
+        $('#ai-result').text('No text selected. Please select some text in the document.');
+      }
+    })
+    .withFailureHandler(function(error) {
+      $('#ai-result').text('Error: ' + error.message);
+    })
+    .getSelectedText();
 }
 
 function displayAIResult(result) {
