@@ -26,3 +26,7 @@ function insertText(text, index) {
 }
 
 // ... other functions for interacting with the document
+
+function onInstall(e) {
+  onOpen(e);
+}
