@@ -47,7 +47,9 @@ function getAISuggestions(text, style, operation) {
   }
   
   // Store your API key securely. In a real-world scenario, use PropertiesService or other secure methods.
-  var OPENAI_API_KEY = 'your_api_key_here';
+  function getOpenAIApiKey() {
+    return PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
+  }
   
   function callOpenAI(prompt, model = 'gpt-4', maxTokens = 150) {
     var url = 'https://api.openai.com/v1/chat/completions';
@@ -62,7 +64,7 @@ function getAISuggestions(text, style, operation) {
       'method' : 'post',
       'contentType': 'application/json',
       'headers': {
-        'Authorization': 'Bearer ' + OPENAI_API_KEY
+        'Authorization': 'Bearer ' + getOpenAIApiKey()
       },
       'payload' : JSON.stringify(payload)
     };
@@ -79,4 +81,3 @@ function getAISuggestions(text, style, operation) {
   }
   
   // ... other AI-related functions
-  
