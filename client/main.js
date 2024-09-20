@@ -35,7 +35,11 @@ function handleAIOperation(operation) {
       if (text) {
         google.script.run
           .withSuccessHandler(function(suggestion) {
-            $('#ai-result').html(suggestion);
+            if (suggestion.startsWith('Error:')) {
+              $('#ai-result').text(suggestion);
+            } else {
+              $('#ai-result').html(suggestion);
+            }
           })
           .withFailureHandler(function(error) {
             $('#ai-result').text('Error: ' + error);
