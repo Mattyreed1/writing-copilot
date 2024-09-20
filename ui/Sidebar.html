@@ -9,36 +9,44 @@
   </head>
   <body>
     <div id="sidebar-content">
-      <h1>Writing Copilot</h1>
-      
-      <div id="writer-style-section">
-        <h2>Writers</h2>
-        <select id="writer-style-select" multiple="multiple">
-        </select>
-      </div>
-
-      <div id="writing-style-section">
-        <h2>Styles</h2>
-        <select id="writing-style-select" multiple="multiple">
-        </select>
-      </div>
-
-      <div id="ai-suggestions-section">
-        <h2>AI Suggestions</h2>
-        <div class="button-container">
-          <button id="edit-btn">Edit</button>
-          <button id="rewrite-btn">Rewrite</button>
-          <button id="continue-btn">Continue</button>
+      <div class="header">
+        <h1>Writing Copilot</h1>
+        <div class="header-icons">
+          <span class="icon">⋮</span>
+          <span class="icon">×</span>
         </div>
-        <div id="ai-result"></div>
+      </div>
+      
+      <div class="section">
+        <h2>Set Writing Style</h2>
+        <select id="writer-style-select" placeholder="SELECT WRITER">
+          <option></option>
+        </select>
+        <select id="writing-style-select" placeholder="SELECT STYLE">
+          <option></option>
+        </select>
       </div>
 
-      <div id="citations-section">
-        <h2>Quotes & Resources</h2>
-        <button id="find-quotes">Find Quotes</button>
-        <button id="find-citations">Find Resources</button>
-        <div id="citations-output"></div>
+      <div class="section">
+        <h2>Generate Suggestions</h2>
+        <div class="button-container">
+          <button id="edit-btn">EDIT</button>
+          <button id="rewrite-btn">REWRITE</button>
+          <button id="continue-btn">CONTINUE</button>
+        </div>
       </div>
+
+      <div id="ai-result"></div>
+
+      <div class="section">
+        <h2>Find Quotes & Resources</h2>
+        <div class="button-container">
+          <button id="find-quotes">FIND QUOTES</button>
+          <button id="find-citations">FIND RESOURCES</button>
+        </div>
+      </div>
+
+      <div id="citations-output"></div>
     </div>
 
     <script>
@@ -66,7 +74,9 @@
         // Initialize Select2 with multiple selection
         $('#writer-style-select, #writing-style-select').select2({
           width: '100%',
-          placeholder: 'Select options',
+          placeholder: function() {
+            return $(this).attr('placeholder');
+          },
           allowClear: true
         });
 
@@ -109,7 +119,8 @@
         
         google.script.run
           .withSuccessHandler(function(suggestion) {
-            $('#ai-result').html(suggestion);
+            var formattedSuggestion = formatAIResponse(suggestion);
+            $('#ai-result').html(formattedSuggestion);
           })
           .withFailureHandler(function(error) {
             $('#ai-result').text('Error: ' + error.message);

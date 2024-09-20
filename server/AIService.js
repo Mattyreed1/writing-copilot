@@ -7,7 +7,7 @@ function getAISuggestions(text, writers, styles, operation) {
   var prompt = '';
   switch(operation) {
     case 'edit':
-      prompt = `Edit the following text in the style of ${writersString}, using ${stylesString} writing styles. Provide the edited version and a brief explanation of the changes:\n\n${text}`;
+      prompt = `Suggest specific edits for the following text in the style of ${writersString}, using ${stylesString} writing styles. Provide the edits and a brief explanation of why you suggest the changes:\n\n${text}`;
       break;
     case 'rewrite':
       prompt = `Rewrite the following text in the style of ${writersString}, maintaining ${stylesString} writing styles. Provide 3 different versions:\n\n${text}`;

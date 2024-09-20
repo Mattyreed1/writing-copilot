@@ -1,63 +1,103 @@
 <style>
     body {
-        font-family: 'Inter','Arial', sans-serif;
+        font-family: 'Roboto', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+    }
+
+    #sidebar-content {
+        padding: 16px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #1a73e8;
+        color: white;
+        padding: 12px 16px;
+        margin: -16px -16px 16px -16px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: normal;
+    }
+
+    .header-icons {
+        font-size: 18px;
+    }
+
+    .icon {
+        margin-left: 16px;
+        cursor: pointer;
+    }
+
+    h2 {
+        color: #1a73e8;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .section {
+        margin-bottom: 24px;
+    }
+
+    select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
     }
 
     .button-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
     }
 
-    .button-container button {
-    flex: 1;
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    button {
+        flex: 1;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
     }
 
-    .button-container button:hover {
-    background-color: #45a049;
+    button:hover {
+        background-color: #1765cc;
     }
 
-#ai-result {
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 4px;
+    #ai-result, #citations-output {
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 24px;
     }
 
-  #ai-suggestions .button-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
+    /* Override Select2 styles */
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        height: 36px;
+    }
 
-  #ai-suggestions .button-container button {
-    flex: 1;
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+        color: #757575;
+    }
 
-  #ai-suggestions .button-container button:hover {
-    background-color: #45a049;
-  }
-
-  #ai-suggestions #ai-result {
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 4px;
-  }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 34px;
+    }
 </style>
 
 
