@@ -34,8 +34,9 @@
       </div>
 
       <div id="citations-section">
-        <h2>Citations</h2>
-        <button id="find-citations">Find Citations</button>
+        <h2>Quotes & Resources</h2>
+        <button id="find-quotes">Find Quotes</button>
+        <button id="find-citations">Find Resources</button>
         <div id="citations-output"></div>
       </div>
     </div>
@@ -73,6 +74,16 @@
         $('#edit-btn').click(() => handleAIOperation('edit'));
         $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
         $('#continue-btn').click(() => handleAIOperation('continue'));
+
+        // Find quotes button click handler
+        $('#find-quotes').click(function() {
+          google.script.run.withSuccessHandler(function(quotes) {
+            var quotesHtml = quotes.map(function(quote) {
+              return '<p>"' + quote.text + '" - ' + quote.author + '</p>';
+            }).join('');
+            $('#citations-output').html(quotesHtml);
+          }).findQuotes();
+        });
 
         // Find citations button click handler
         $('#find-citations').click(function() {
