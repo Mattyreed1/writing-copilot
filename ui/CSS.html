@@ -3,7 +3,8 @@
         font-family: 'Roboto', Arial, sans-serif;
         margin: 0;
         padding: 0;
-        background-color: #f0f0f0;
+        background-color: #f1f3f4;
+        color: #202124;
     }
 
     #sidebar-content {
@@ -16,14 +17,14 @@
         align-items: center;
         background-color: #1a73e8;
         color: white;
-        padding: 12px 16px;
+        padding: 8px 16px;
         margin: -16px -16px 16px -16px;
     }
 
     .header h1 {
         margin: 0;
-        font-size: 18px;
-        font-weight: normal;
+        font-size: 16px;
+        font-weight: 500;
     }
 
     .header-icons {
@@ -36,9 +37,10 @@
     }
 
     h2 {
-        color: #1a73e8;
+        color: #202124;
         font-size: 14px;
-        margin-bottom: 12px;
+        font-weight: 500;
+        margin-bottom: 8px;
     }
 
     .section {
@@ -68,16 +70,18 @@
         padding: 8px 16px;
         border-radius: 4px;
         cursor: pointer;
-        font-weight: bold;
+        font-weight: 500;
+        font-size: 14px;
+        text-transform: uppercase;
     }
 
     button:hover {
-        background-color: #1765cc;
+        background-color: #185abc;
     }
 
     #ai-result, #citations-output {
         background-color: white;
-        border: 1px solid #ccc;
+        border: 1px solid #dadce0;
         border-radius: 4px;
         padding: 12px;
         margin-bottom: 24px;
@@ -97,6 +101,23 @@
 
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 34px;
+    }
+
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        min-height: 36px;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+        padding: 4px 8px;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #e8f0fe;
+        border: 1px solid #dadce0;
+        border-radius: 4px;
+        padding: 2px 6px;
     }
 </style>
 
