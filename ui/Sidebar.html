@@ -12,13 +12,13 @@
       <h1>Writing Copilot</h1>
       
       <div id="writer-style-section">
-        <h2>Writer Styles</h2>
+        <h2>Writers</h2>
         <select id="writer-style-select" multiple="multiple">
         </select>
       </div>
 
       <div id="writing-style-section">
-        <h2>Writing Styles</h2>
+        <h2>Styles</h2>
         <select id="writing-style-select" multiple="multiple">
         </select>
       </div>
@@ -61,6 +61,13 @@
           });
           select.select2();
         }).getWritingStyles();
+
+        // Initialize Select2 with multiple selection
+        $('#writer-style-select, #writing-style-select').select2({
+          width: '100%',
+          placeholder: 'Select options',
+          allowClear: true
+        });
 
         // AI Suggestions button click handlers
         $('#edit-btn').click(() => handleAIOperation('edit'));
