@@ -1,35 +1,59 @@
-function onJQueryLoad() {
-  $(document).ready(function() {
-    google.script.run.withSuccessHandler(onLoad).showSidebar();
-  });
-}
-
-// Check if jQuery is loaded
-if (typeof jQuery != 'undefined') {
-  onJQueryLoad();
-} else {
-  console.error('jQuery failed to load');
-}
-
-function onLoad() {
+$(document).ready(function() {
   console.log('Sidebar loaded');
-  
+
+  // Event bindings
   $('#edit-btn').click(() => handleAIOperation('edit'));
   $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
   $('#continue-btn').click(() => handleAIOperation('continue'));
-}
+  $('#find-quotes').click(handleFindQuotes);
+  $('#find-citations').click(handleFindResources);
+
+  // Initialize Select2 for multiple select inputs
+  $('#writer-style-select, #writing-style-select').select2({
+    width: '100%',
+    placeholder: function() {
+      return $(this).attr('placeholder');
+    },
+    allowClear: true,
+    multiple: true
+  });
+
+  // Load writer styles from the server and populate the select input
+  google.script.run.withSuccessHandler(function(styles) {
+    var select = $('#writer-style-select');
+    styles.forEach(function(style) {
+      select.append($('<option></option>').val(style).text(style));
+    });
+    select.trigger('change');
+  }).getWriterStyles();
+
+  // Load writing styles from the server and populate the select input
+  google.script.run.withSuccessHandler(function(styles) {
+    var select = $('#writing-style-select');
+    styles.forEach(function(style) {
+      select.append($('<option></option>').val(style).text(style));
+    });
+    select.trigger('change');
+  }).getWritingStyles();
+
+  // Check for initial text selection and update UI accordingly
+  checkTextSelection();
+
+  // Periodically check for text selection every second
+  setInterval(checkTextSelection, 1000);
+});
 
 function handleAIOperation(operation) {
   var selectedWriters = $('#writer-style-select').select2('data').map(item => item.text);
   var selectedStyles = $('#writing-style-select').select2('data').map(item => item.text);
-  
+
   if (!selectedWriters.length || !selectedStyles.length) {
     alert('Please select at least one writer style and one writing style.');
     return;
   }
-  
+
   $('#ai-result').text('Loading...');
-  
+
   google.script.run
     .withSuccessHandler(function(suggestion) {
       if (suggestion.startsWith('Error:')) {
@@ -44,58 +68,6 @@ function handleAIOperation(operation) {
     .getAISuggestions(selectedWriters, selectedStyles, operation);
 }
 
-function displayAIResult(result) {
-  $('#ai-result').html(result);
-}
-
-function handleError(error) {
-  $('#ai-result').text('Error: ' + error.message);
-}
-
-$(document).ready(function() {
-  console.log('Sidebar loaded');
-
-  $('#edit-btn').click(() => handleAIOperation('edit'));
-  $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
-  $('#continue-btn').click(() => handleAIOperation('continue'));
-  $('#find-quotes').click(handleFindQuotes);
-  $('#find-citations').click(handleFindResources);
-
-  // Initialize Select2
-  $('#writer-style-select, #writing-style-select').select2({
-    width: '100%',
-    placeholder: function() {
-      return $(this).attr('placeholder');
-    },
-    allowClear: true,
-    multiple: true
-  });
-
-  // Load writer styles
-  google.script.run.withSuccessHandler(function(styles) {
-    var select = $('#writer-style-select');
-    styles.forEach(function(style) {
-      select.append($('<option></option>').val(style).text(style));
-    });
-    select.trigger('change');
-  }).getWriterStyles();
-
-  // Load writing styles
-  google.script.run.withSuccessHandler(function(styles) {
-    var select = $('#writing-style-select');
-    styles.forEach(function(style) {
-      select.append($('<option></option>').val(style).text(style));
-    });
-    select.trigger('change');
-  }).getWritingStyles();
-
-  // Check for initial text selection
-  checkTextSelection();
-
-  // Check for text selection periodically
-  setInterval(checkTextSelection, 1000);
-});
-
 function handleFindQuotes() {
   // Implement the logic to find quotes
   google.script.run
@@ -105,7 +77,7 @@ function handleFindQuotes() {
     .withFailureHandler(function(error) {
       $('#ai-result').text('Error: ' + error.message);
     })
-    .getQuotes();
+    .findQuotes();
 }
 
 function handleFindResources() {
@@ -117,7 +89,7 @@ function handleFindResources() {
     .withFailureHandler(function(error) {
       $('#citations-output').text('Error: ' + error.message);
     })
-    .getResources();
+    .findCitations();
 }
 
 function checkTextSelection() {

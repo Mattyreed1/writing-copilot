@@ -15,7 +15,7 @@ function onInstall(e) {
 
 function showSidebar() {
   const html = HtmlService.createHtmlOutputFromFile('ui/Sidebar')
-    .setTitle('Your Add-on Sidebar');
+    .setTitle('Writing Copilot');
   DocumentApp.getUi().showSidebar(html);
 }
 
@@ -49,19 +49,11 @@ function getSelectedText() {
     var elements = selection.getSelectedElements();
     return elements.map(function(element) {
       if (element.isPartial()) {
-        return element
-          .getElement()
-          .asText()
-          .getSubstring(element.getStartOffset(), element.getEndOffsetInclusive());
+        return element.getElement().asText().getSubstring(element.getStartOffset(), element.getEndOffsetInclusive());
       } else {
         return element.getElement().asText().getText();
       }
     }).join('\n');
   }
   return '';
-}
-
-function loadScript(url) {
-  var response = UrlFetchApp.fetch(url);
-  return response.getContentText();
 }
