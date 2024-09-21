@@ -18,11 +18,36 @@ function showSidebarFromMenu() {
 }
 
 function showSidebar() {
-  var html = HtmlService.createTemplateFromFile('ui/Sidebar.html')
-    .evaluate()
-    .setTitle('Writing Copilot')
-    .setWidth(300);
-  DocumentApp.getUi().showSidebar(html);
+  var card = createCard();
+  var ui = CardService.newUniversalActionResponseBuilder()
+    .displayAddOnCards([card])
+    .build();
+  return ui;
+}
+
+function createCard(selectedText = '') {
+  var card = CardService.newCardBuilder()
+    .setName("Writing Copilot")
+    .addSection(CardService.newCardSection()
+      .addWidget(CardService.newTextParagraph().setText(selectedText ? "Selected text: " + selectedText : "No text selected"))
+      .addWidget(CardService.newTextInput()
+        .setFieldName("writerStyle")
+        .setTitle("Writer Style"))
+      .addWidget(CardService.newTextInput()
+        .setFieldName("writingStyle")
+        .setTitle("Writing Style"))
+      .addWidget(CardService.newButtonSet()
+        .addButton(CardService.newTextButton()
+          .setText("Edit")
+          .setOnClickAction(CardService.newAction().setFunctionName("handleEdit")))
+        .addButton(CardService.newTextButton()
+          .setText("Rewrite")
+          .setOnClickAction(CardService.newAction().setFunctionName("handleRewrite")))
+        .addButton(CardService.newTextButton()
+          .setText("Continue")
+          .setOnClickAction(CardService.newAction().setFunctionName("handleContinue")))))
+    .build();
+  return card;
 }
 
 function getSelectedText() {
@@ -57,3 +82,15 @@ function getWritingStyles() {
 }
 
 // ... other functions for interacting with the document
+
+function onSelectionChange(e) {
+  var selection = DocumentApp.getActiveDocument().getSelection();
+  if (selection) {
+    var selectedText = getSelectedText();
+    CardService.newActionResponseBuilder()
+      .setStateChanged(true)
+      .setNavigation(CardService.newNavigation()
+        .updateCard(createCard(selectedText)))
+      .build();
+  }
+}
