@@ -53,6 +53,14 @@ function handleError(error) {
 }
 
 $(document).ready(function() {
+  console.log('Sidebar loaded');
+
+  $('#edit-btn').click(() => handleAIOperation('edit'));
+  $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
+  $('#continue-btn').click(() => handleAIOperation('continue'));
+  $('#find-quotes').click(handleFindQuotes);
+  $('#find-citations').click(handleFindResources);
+
   // Initialize Select2
   $('#writer-style-select, #writing-style-select').select2({
     width: '100%',
@@ -80,15 +88,6 @@ $(document).ready(function() {
     });
     select.trigger('change');
   }).getWritingStyles();
-
-  // AI Suggestions button click handlers
-  $('#edit-btn').click(() => handleAIOperation('edit'));
-  $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
-  $('#continue-btn').click(() => handleAIOperation('continue'));
-
-  // Find quotes and resources button click handlers
-  $('#find-quotes').click(handleFindQuotes);
-  $('#find-citations').click(handleFindResources);
 
   // Check for initial text selection
   checkTextSelection();

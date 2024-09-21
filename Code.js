@@ -60,3 +60,8 @@ function getSelectedText() {
   }
   return '';
 }
+
+function loadScript(url) {
+  var response = UrlFetchApp.fetch(url);
+  return response.getContentText();
+}
