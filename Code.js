@@ -2,11 +2,15 @@
  * @OnlyCurrentDoc
  */
 
-function onOpen() {
-  DocumentApp.getUi()
-    .createAddonMenu()
-    .addItem('Open Writing Copilot', 'showSidebar')
-    .addToUi();
+function onOpen(e) {
+  try {
+    var ui = DocumentApp.getUi();
+    ui.createAddonMenu()
+      .addItem('Open Writing Copilot', 'showSidebar')
+      .addToUi();
+  } catch (error) {
+    console.error('Error in onOpen:', error);
+  }
 }
 
 function onInstall(e) {
