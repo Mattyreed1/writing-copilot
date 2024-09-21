@@ -3,14 +3,10 @@
  */
 
 function onOpen(e) {
-  try {
-    var ui = DocumentApp.getUi();
-    ui.createAddonMenu()
-      .addItem('Open Writing Copilot', 'showSidebar')
-      .addToUi();
-  } catch (error) {
-    console.error('Error in onOpen:', error);
-  }
+  DocumentApp.getUi()
+    .createAddonMenu()
+    .addItem('Open Sidebar', 'showSidebar')
+    .addToUi();
 }
 
 function onInstall(e) {
@@ -18,9 +14,9 @@ function onInstall(e) {
 }
 
 function showSidebar() {
-  var ui = HtmlService.createHtmlOutputFromFile('ui/Sidebar')
-    .setTitle('Writing Copilot');
-  DocumentApp.getUi().showSidebar(ui);
+  const html = HtmlService.createHtmlOutputFromFile('ui/Sidebar')
+    .setTitle('Your Add-on Sidebar');
+  DocumentApp.getUi().showSidebar(html);
 }
 
 function include(filename) {

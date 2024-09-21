@@ -1,20 +1,28 @@
 {
-  "timeZone": "America/Los_Angeles",
+  "timeZone": "America/New_York",
   "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
-  "runtimeVersion": "V8",
   "oauthScopes": [
     "https://www.googleapis.com/auth/documents",
     "https://www.googleapis.com/auth/script.external_request",
-    "https://www.googleapis.com/auth/script.container.ui"
+    "https://www.googleapis.com/auth/userinfo.email"
   ],
   "addOns": {
-    "common": {
-      "name": "Writing Copilot",
-      "logoUrl": "https://example.com/logo.png",
-      "useLocaleFromApp": true,
+    "docs": {
       "homepageTrigger": {
-        "runFunction": "showSidebar"
+        "runFunction": "showSidebar",
+        "enabled": true
+      },
+      "openTrigger": {
+        "runFunction": "onOpen"
+      },
+      "common": {
+        "name": "Your Add-on Name",
+        "logoUrl": "https://www.example.com/logo.png",
+        "layoutProperties": {
+          "primaryColor": "#4285F4",
+          "secondaryColor": "#FFFFFF"
+        }
       }
     }
   }
