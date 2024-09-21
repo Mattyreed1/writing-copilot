@@ -1,7 +1,6 @@
 {
   "timeZone": "America/Los_Angeles",
-  "dependencies": {
-  },
+  "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
   "oauthScopes": [
@@ -16,14 +15,6 @@
       "useLocaleFromApp": true,
       "homepageTrigger": {
         "runFunction": "showSidebar"
-      },
-      "onFileScopeGrantedTrigger": {
-        "runFunction": "showSidebar"
-      }
-    },
-    "docs": {
-      "onSelectionChangeTrigger": {
-        "runFunction": "onSelectionChange"
       }
     }
   }
