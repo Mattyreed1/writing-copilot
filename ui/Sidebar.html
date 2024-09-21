@@ -31,6 +31,7 @@
     </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     <div id="ai-result" class="result-container"></div>
 =======
       <div id="ai-result"></div>
@@ -41,15 +42,116 @@
       <div class="button-container">
         <button id="find-quotes" disabled>QUOTES</button>
         <button id="find-citations" disabled>RESOURCES</button>
+=======
+      <div id="ai-result"></div>
+
+      <div class="section">
+        <h2>Find Quotes & Resources</h2>
+        <div class="button-container">
+          <button id="find-quotes" disabled>QUOTES</button>
+          <button id="find-citations" disabled>RESOURCES</button>
+        </div>
+>>>>>>> parent of 084e3ff... update ui
       </div>
 <<<<<<< HEAD
 =======
 
       <div id="citations-output"></div>
+<<<<<<< HEAD
 >>>>>>> parent of 084e3ff... update ui
     </div>
 
     <div id="citations-output" class="result-container"></div>
+=======
+    </div>
+
+    <script>
+      $(function() {
+        // Initialize Select2 with multiple selection
+        $('#writer-style-select, #writing-style-select').select2({
+          width: '100%',
+          placeholder: function() {
+            return $(this).attr('placeholder');
+          },
+          allowClear: true,
+          multiple: true
+        });
+
+        // Load writer styles
+        google.script.run.withSuccessHandler(function(styles) {
+          var select = $('#writer-style-select');
+          styles.forEach(function(style) {
+            select.append($('<option></option>').val(style).text(style));
+          });
+          select.trigger('change');
+        }).getWriterStyles();
+
+        // Load writing styles
+        google.script.run.withSuccessHandler(function(styles) {
+          var select = $('#writing-style-select');
+          styles.forEach(function(style) {
+            select.append($('<option></option>').val(style).text(style));
+          });
+          select.trigger('change');
+        }).getWritingStyles();
+
+        // AI Suggestions button click handlers
+        $('#edit-btn').click(() => handleAIOperation('edit'));
+        $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
+        $('#continue-btn').click(() => handleAIOperation('continue'));
+
+        // Find quotes and resources button click handlers
+        $('#find-quotes').click(handleFindQuotes);
+        $('#find-citations').click(handleFindResources);
+
+        // Check for text selection periodically
+        setInterval(checkTextSelection, 1000);
+      });
+
+      function handleAIOperation(operation) {
+        var selectedWriters = $('#writer-style-select').select2('data').map(item => item.text);
+        var selectedStyles = $('#writing-style-select').select2('data').map(item => item.text);
+        
+        if (!selectedWriters.length || !selectedStyles.length) {
+          alert('Please select at least one writer style and one writing style.');
+          return;
+        }
+        
+        $('#ai-result').text('Loading...');
+        
+        google.script.run
+          .withSuccessHandler(function(suggestion) {
+            var formattedSuggestion = formatAIResponse(suggestion);
+            $('#ai-result').html(formattedSuggestion);
+          })
+          .withFailureHandler(function(error) {
+            $('#ai-result').text('Error: ' + error.message);
+          })
+          .getAISuggestions(selectedWriters, selectedStyles, operation);
+      }
+
+      function handleFindQuotes() {
+        google.script.run.withSuccessHandler(function(quotes) {
+          var quotesHtml = quotes.map(function(quote) {
+            return '<p>"' + quote.text + '" - ' + quote.author + '</p>';
+          }).join('');
+          $('#citations-output').html(quotesHtml);
+        }).findQuotes();
+      }
+
+      function handleFindResources() {
+        google.script.run.withSuccessHandler(function(citations) {
+          var citationsHtml = citations.map(function(citation) {
+            return '<p>' + citation.title + ' by ' + citation.author + ' (' + citation.year + ')</p>';
+          }).join('');
+          $('#citations-output').html(citationsHtml);
+        }).findCitations();
+      }
+
+      function checkTextSelection() {
+        google.script.run.withSuccessHandler(updateUIBasedOnSelection).getSelectedText();
+      }
+>>>>>>> parent of 084e3ff... update ui
 
     <!-- Include the main.js script after loading jQuery and Select2 -->
     <script src="client/main.js"></script>
