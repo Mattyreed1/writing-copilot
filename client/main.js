@@ -97,37 +97,28 @@ $(document).ready(function() {
   setInterval(checkTextSelection, 1000);
 });
 
-function handleAIOperation(operation) {
-  var selectedWriters = $('#writer-style-select').select2('data').map(item => item.text);
-  var selectedStyles = $('#writing-style-select').select2('data').map(item => item.text);
-  
-  if (!selectedWriters.length || !selectedStyles.length) {
-    alert('Please select at least one writer style and one writing style.');
-    return;
-  }
-  
-  $('#ai-result').text('Loading...');
-  
+function handleFindQuotes() {
+  // Implement the logic to find quotes
   google.script.run
-    .withSuccessHandler(function(suggestion) {
-      if (suggestion.startsWith('Error:')) {
-        $('#ai-result').text(suggestion);
-      } else {
-        $('#ai-result').html(suggestion);
-      }
+    .withSuccessHandler(function(quotes) {
+      $('#ai-result').html(quotes);
     })
     .withFailureHandler(function(error) {
       $('#ai-result').text('Error: ' + error.message);
     })
-    .getAISuggestions(selectedWriters, selectedStyles, operation);
-}
-
-function handleFindQuotes() {
-  // ... (keep the existing code)
+    .getQuotes();
 }
 
 function handleFindResources() {
-  // ... (keep the existing code)
+  // Implement the logic to find resources
+  google.script.run
+    .withSuccessHandler(function(resources) {
+      $('#citations-output').html(resources);
+    })
+    .withFailureHandler(function(error) {
+      $('#citations-output').text('Error: ' + error.message);
+    })
+    .getResources();
 }
 
 function checkTextSelection() {
