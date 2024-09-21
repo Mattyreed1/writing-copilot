@@ -31,28 +31,17 @@ function handleAIOperation(operation) {
   $('#ai-result').text('Loading...');
   
   google.script.run
-    .withSuccessHandler(function(text) {
-      if (text) {
-        google.script.run
-          .withSuccessHandler(function(suggestion) {
-            if (suggestion.startsWith('Error:')) {
-              $('#ai-result').text(suggestion);
-            } else {
-              $('#ai-result').html(suggestion);
-            }
-          })
-          .withFailureHandler(function(error) {
-            $('#ai-result').text('Error: ' + error);
-          })
-          .getAISuggestions(text, selectedWriters, selectedStyles, operation);
+    .withSuccessHandler(function(suggestion) {
+      if (suggestion.startsWith('Error:')) {
+        $('#ai-result').text(suggestion);
       } else {
-        $('#ai-result').text('No text selected. Please select some text in the document.');
+        $('#ai-result').html(suggestion);
       }
     })
     .withFailureHandler(function(error) {
-      $('#ai-result').text('Error: ' + error);
+      $('#ai-result').text('Error: ' + error.message);
     })
-    .getSelectedText();
+    .getAISuggestions(selectedWriters, selectedStyles, operation);
 }
 
 function displayAIResult(result) {
