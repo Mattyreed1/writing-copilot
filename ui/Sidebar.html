@@ -2,8 +2,6 @@
 <html>
   <head>
     <base target="_top">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <?!= include('ui/CSS'); ?>
   </head>
@@ -52,100 +50,71 @@
     </div>
 
     <script>
-      $(function() {
-        // Initialize Select2 with multiple selection
-        $('#writer-style-select, #writing-style-select').select2({
-          width: '100%',
-          placeholder: function() {
-            return $(this).attr('placeholder');
-          },
-          allowClear: true,
-          multiple: true
-        });
-
-        // Load writer styles
-        google.script.run.withSuccessHandler(function(styles) {
-          var select = $('#writer-style-select');
-          styles.forEach(function(style) {
-            select.append($('<option></option>').val(style).text(style));
-          });
-          select.trigger('change');
-        }).getWriterStyles();
-
-        // Load writing styles
-        google.script.run.withSuccessHandler(function(styles) {
-          var select = $('#writing-style-select');
-          styles.forEach(function(style) {
-            select.append($('<option></option>').val(style).text(style));
-          });
-          select.trigger('change');
-        }).getWritingStyles();
-
-        // AI Suggestions button click handlers
-        $('#edit-btn').click(() => handleAIOperation('edit'));
-        $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
-        $('#continue-btn').click(() => handleAIOperation('continue'));
-
-        // Find quotes and resources button click handlers
-        $('#find-quotes').click(handleFindQuotes);
-        $('#find-citations').click(handleFindResources);
-
-        // Check for initial text selection
-        checkTextSelection();
-
-        // Check for text selection periodically
-        setInterval(checkTextSelection, 1000);
-      });
-
-      function handleAIOperation(operation) {
-        var selectedWriters = $('#writer-style-select').select2('data').map(item => item.text);
-        var selectedStyles = $('#writing-style-select').select2('data').map(item => item.text);
-        
-        if (!selectedWriters.length || !selectedStyles.length) {
-          alert('Please select at least one writer style and one writing style.');
-          return;
+      // Fallback function to load jQuery if CDN fails
+      function loadJQuery(callback) {
+        if (typeof jQuery === 'undefined') {
+          var script = document.createElement('script');
+          script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js';
+          script.onload = callback;
+          script.onerror = function() {
+            console.error('Failed to load jQuery from CDN');
+          };
+          document.body.appendChild(script);
+        } else {
+          callback();
         }
-        
-        $('#ai-result').text('Loading...');
-        
-        google.script.run
-          .withSuccessHandler(function(suggestion) {
-            var formattedSuggestion = formatAIResponse(suggestion);
-            $('#ai-result').html(formattedSuggestion);
-          })
-          .withFailureHandler(function(error) {
-            $('#ai-result').text('Error: ' + error.message);
-          })
-          .getAISuggestions(selectedWriters, selectedStyles, operation);
       }
 
-      function handleFindQuotes() {
-        google.script.run.withSuccessHandler(function(quotes) {
-          var quotesHtml = quotes.map(function(quote) {
-            return '<p>"' + quote.text + '" - ' + quote.author + '</p>';
-          }).join('');
-          $('#citations-output').html(quotesHtml);
-        }).findQuotes();
+      // Initialize sidebar after jQuery is loaded
+      function initializeSidebar() {
+        $(function() {
+          // Initialize Select2 with multiple selection
+          $('#writer-style-select, #writing-style-select').select2({
+            width: '100%',
+            placeholder: function() {
+              return $(this).attr('placeholder');
+            },
+            allowClear: true,
+            multiple: true
+          });
+
+          // Load writer styles
+          google.script.run.withSuccessHandler(function(styles) {
+            var select = $('#writer-style-select');
+            styles.forEach(function(style) {
+              select.append($('<option></option>').val(style).text(style));
+            });
+            select.trigger('change');
+          }).getWriterStyles();
+
+          // Load writing styles
+          google.script.run.withSuccessHandler(function(styles) {
+            var select = $('#writing-style-select');
+            styles.forEach(function(style) {
+              select.append($('<option></option>').val(style).text(style));
+            });
+            select.trigger('change');
+          }).getWritingStyles();
+
+          // AI Suggestions button click handlers
+          $('#edit-btn').click(() => handleAIOperation('edit'));
+          $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
+          $('#continue-btn').click(() => handleAIOperation('continue'));
+
+          // Find quotes and resources button click handlers
+          $('#find-quotes').click(handleFindQuotes);
+          $('#find-citations').click(handleFindResources);
+
+          // Check for initial text selection
+          checkTextSelection();
+
+          // Check for text selection periodically
+          setInterval(checkTextSelection, 1000);
+        });
       }
 
-      function handleFindResources() {
-        google.script.run.withSuccessHandler(function(citations) {
-          var citationsHtml = citations.map(function(citation) {
-            return '<p>' + citation.title + ' by ' + citation.author + ' (' + citation.year + ')</p>';
-          }).join('');
-          $('#citations-output').html(citationsHtml);
-        }).findCitations();
-      }
-
-      function checkTextSelection() {
-        google.script.run.withSuccessHandler(updateUIBasedOnSelection).getSelectedText();
-      }
-
-      function updateUIBasedOnSelection(selectedText) {
-        const hasSelection = selectedText.trim().length > 0;
-        $('#no-selection-message').toggle(!hasSelection);
-        $('#edit-btn, #rewrite-btn, #continue-btn, #find-quotes, #find-citations').prop('disabled', !hasSelection);
-      }
+      // Load jQuery and initialize sidebar
+      loadJQuery(initializeSidebar);
     </script>
   </body>
 </html>

@@ -19,7 +19,12 @@ function getAISuggestions(text, writers, styles, operation) {
       return `Error: Invalid operation '${operation}'. Please use 'edit', 'rewrite', or 'continue'.`;
   }
 
-  return callOpenAI(prompt);
+  try {
+    return callOpenAI(prompt);
+  } catch (error) {
+    Logger.log('Error in getAISuggestions: ' + error);
+    return 'An error occurred while processing your request. Please try again.';
+  }
 }
 
 // Store your API key securely. In a real-world scenario, use PropertiesService or other secure methods.
@@ -27,7 +32,7 @@ function getOpenAIApiKey() {
   return PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
 }
 
-function callOpenAI(prompt, model = 'gpt-4', maxTokens = 150) {
+function callOpenAI(prompt, model = 'gpt-4', maxTokens = 500) {
   var url = 'https://api.openai.com/v1/chat/completions';
   
   var payload = {
@@ -45,17 +50,28 @@ function callOpenAI(prompt, model = 'gpt-4', maxTokens = 150) {
     'headers': {
       'Authorization': 'Bearer ' + getOpenAIApiKey()
     },
-    'payload' : JSON.stringify(payload)
+    'payload' : JSON.stringify(payload),
+    'muteHttpExceptions': true,
+    'timeout': 30000 // 30 seconds timeout
   };
   
   try {
     var response = UrlFetchApp.fetch(url, options);
+    var statusCode = response.getResponseCode();
     var json = response.getContentText();
+    
+    if (statusCode !== 200) {
+      throw new Error(`HTTP ${statusCode}: ${json}`);
+    }
+    
     var data = JSON.parse(json);
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error('No choices returned from OpenAI');
+    }
     return data.choices[0].message.content.trim();
   } catch(error) {
     Logger.log('Error calling OpenAI API: ' + error);
-    return null;
+    throw new Error('Failed to get a response from OpenAI. Please try again.');
   }
 }
 
