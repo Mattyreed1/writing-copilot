@@ -2,10 +2,12 @@
 <html>
   <head>
     <base target="_top">
-    <!-- Link to Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <!-- Include your custom CSS -->
     <?!= include('ui/CSS'); ?>
+    <!-- Load jQuery first -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Then load Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   </head>
   <body>
     <div id="no-selection-message">Select text in the Google doc.</div>
@@ -40,13 +42,7 @@
 
     <div id="citations-output" class="result-container"></div>
 
-    <!-- Load jQuery first -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Then load Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <!-- Include the main.js script using the include function -->
-    <script>
-      <?!= include('client/main'); ?>
-    </script>
+    <!-- Include the main.js script after loading jQuery and Select2 -->
+    <script src="client/main.js"></script>
   </body>
 </html>
