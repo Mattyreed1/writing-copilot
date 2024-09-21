@@ -16,7 +16,7 @@ function getAISuggestions(text, writers, styles, operation) {
       prompt = `Continue the following text in the style of ${writersString}, maintaining ${stylesString} writing styles. Add approximately 100 words:\n\n${text}`;
       break;
     default:
-      return `Error: Invalid operation '${operation}'. Please use 'edit', 'rewrite', or 'continue'.`;
+      return 'Invalid operation';
   }
 
   try {

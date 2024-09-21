@@ -55,9 +55,22 @@ function handleAIOperation(operation) {
   $('#ai-result').text('Loading...');
 
   google.script.run
+<<<<<<< HEAD
     .withSuccessHandler(function(suggestion) {
       if (suggestion.startsWith('Error:')) {
         $('#ai-result').text(suggestion);
+=======
+    .withSuccessHandler(function(text) {
+      if (text) {
+        google.script.run
+          .withSuccessHandler(function(suggestion) {
+            $('#ai-result').html(suggestion);
+          })
+          .withFailureHandler(function(error) {
+            $('#ai-result').text('Error: ' + error);
+          })
+          .getAISuggestions(text, selectedWriters, selectedStyles, operation);
+>>>>>>> parent of f9a9f65... add better error handling
       } else {
         $('#ai-result').html(suggestion);
       }
