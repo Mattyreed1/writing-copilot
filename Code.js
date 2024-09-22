@@ -62,6 +62,19 @@ function listenForSelectionChanges() {
 
 function onSelectionChange(e) {
   var text = getSelectedText();
+  updateSidebarText(text);
+}
+
+function updateSidebarText(text) {
   var html = HtmlService.createHtmlOutput('<script>window.parent.updateSelectedText("' + text.replace(/"/g, '\\"') + '");</script>');
   DocumentApp.getUi().showSidebar(html);
+}
+
+function removeTrigger() {
+  var triggers = ScriptApp.getUserTriggers(DocumentApp.getActiveDocument());
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'onSelectionChange') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
 }
