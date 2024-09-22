@@ -110,15 +110,7 @@
             showLoading(false);
             showError(error.message || 'An error occurred while editing the text.');
           })
-          .onEditButtonClicked({
-            commonEventObject: {
-              formInputs: {
-                selectedText: text,
-                selectedWriters: selectedWriters,
-                selectedStyles: selectedStyles
-              }
-            }
-          });
+          .onEditButtonClicked(text, selectedWriters, selectedStyles);
       }
 
       function displayEditResults(result) {

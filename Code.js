@@ -128,12 +128,8 @@ function applyEdit(e) {
     .build();
 }
 
-function onEditButtonClicked(e) {
-  var text = e.commonEventObject.formInputs.selectedText;
-  var selectedWriters = e.commonEventObject.formInputs.selectedWriters;
-  var selectedStyles = e.commonEventObject.formInputs.selectedStyles;
-
-  var card = generateEdit(text, selectedWriters, selectedStyles);
+function onEditButtonClicked(selectedText, selectedWriters, selectedStyles) {
+  var card = generateEdit(selectedText, selectedWriters, selectedStyles);
   
   return CardService.newActionResponseBuilder()
     .setNavigation(CardService.newNavigation().pushCard(card))
