@@ -29,9 +29,9 @@ function getSelectedText() {
       }
       return '';
     }).join('\n').trim();
-    return text || 'Please select some text.';
+    return text || 'No text selected';
   }
-  return 'Please select some text.';
+  return 'No text selected';
 }
 
 function generateEdit(text) {
@@ -54,15 +54,17 @@ function include(filename) {
 }
 
 function listenForSelectionChanges() {
-  ScriptApp.newTrigger('onSelectionChange')
-    .forDocument(DocumentApp.getActiveDocument())
-    .onSelectionChange()
-    .create();
+  var selection = DocumentApp.getActiveDocument().getSelection();
+  if (selection) {
+    return getSelectedText();
+  }
+  return 'Please select some text.';
 }
 
 function onSelectionChange(e) {
-  var text = getSelectedText();
-  updateSidebarText(text);
+  var selectedText = getSelectedText();
+  var html = HtmlService.createHtmlOutput('<script>window.parent.updateSelectedText(' + JSON.stringify(selectedText) + ');</script>');
+  DocumentApp.getUi().showSidebar(html);
 }
 
 function updateSidebarText(text) {
