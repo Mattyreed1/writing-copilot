@@ -4,12 +4,6 @@
     <base target="_top">
     <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
     <?!= include('ui/CSS'); ?>
-    <?!= include('components/ResultsContainer'); ?>
-    <?!= include('components/EditResults'); ?>
-    <?!= include('components/RewriteResults'); ?>
-    <?!= include('components/ContinuationResults'); ?>
-    <?!= include('components/QuoteResults'); ?>
-    <?!= include('components/ResourceResults'); ?>
   </head>
   <body>
     <div class="sidebar branding-below">
@@ -38,40 +32,40 @@
       <span class="gray branding-text">Writing Copilot by YourCompany</span>
     </div>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <?!= include('components/ResultsContainer'); ?>
-    <?!= include('components/ContinuationResults'); ?>
-    <?!= include('components/RewriteResults'); ?>
     <script>
-      $(function() {
-        $('.action').click(function() {
-          runAction($(this).data('action'));
-        });
-        
-        google.script.run.withSuccessHandler(updateSelectedText)
-          .withFailureHandler(showError)
-          .getSelectedText();
-      });
-
-      function updateSelectedText(text) {
-        $('#selected-text').val(text);
+      function onSidebarLoad() {
+        google.script.run.withSuccessHandler(updateSelectedText).getSelectedText();
       }
 
       function runAction(action) {
-        $('#error-message').hide();
-        $('#main-card').hide();
-        showResultsContainer(action);
-        
-        google.script.run.withSuccessHandler(function(results) {
-          displayResults(action, results);
-        })
+        var text = document.getElementById('selected-text').value;
+        google.script.run.withSuccessHandler(updateResults)
           .withFailureHandler(showError)
-          [`generate${action.charAt(0).toUpperCase() + action.slice(1)}`]($('#selected-text').val());
+          [action](text);
       }
 
-      function showError(msg) {
-        $('#error-message').text(msg).show();
+      function updateResults(result) {
+        document.getElementById('results-container').innerHTML = result;
       }
+
+      function updateSelectedText(text) {
+        document.getElementById('selected-text').value = text;
+      }
+
+      function showError(error) {
+        document.getElementById('error-message').style.display = 'block';
+        document.getElementById('error-message').innerText = error.message;
+      }
+
+      // Initialize the sidebar
+      google.script.run.withSuccessHandler(onSidebarLoad).getSelectedText();
+
+      // Add event listeners to buttons
+      document.querySelectorAll('.action').forEach(function(button) {
+        button.addEventListener('click', function() {
+          runAction(this.dataset.action);
+        });
+      });
     </script>
   </body>
 </html>

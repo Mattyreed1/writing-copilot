@@ -13,11 +13,11 @@ function onInstall(e) {
 }
 
 function showSidebar() {
-  var ui = HtmlService.createTemplateFromFile('Sidebar')
+  var html = HtmlService.createTemplateFromFile('Sidebar')
       .evaluate()
       .setTitle('Writing Copilot')
       .setSandboxMode(HtmlService.SandboxMode.IFRAME);
-  DocumentApp.getUi().showSidebar(ui);
+  DocumentApp.getUi().showSidebar(html);
 }
 
 function getSelectedText() {
@@ -35,16 +35,18 @@ function getSelectedText() {
 }
 
 function generateEdit(text) {
-  // Implement your edit generation logic here
-  // Return HTML to be displayed in the sidebar
+  var result = callOpenAI("Edit the following text: " + text);
+  return "<div class='block'><h3>Edit Suggestion</h3><div>" + result + "</div></div>";
 }
 
 function generateRewrite(text) {
-  // Implement your rewrite generation logic here
+  var result = callOpenAI("Rewrite the following text: " + text);
+  return "<div class='block'><h3>Rewrite Suggestion</h3><div>" + result + "</div></div>";
 }
 
 function generateContinuation(text) {
-  // Implement your continuation generation logic here
+  var result = callOpenAI("Continue the following text: " + text);
+  return "<div class='block'><h3>Continuation Suggestion</h3><div>" + result + "</div></div>";
 }
 
 function include(filename) {
