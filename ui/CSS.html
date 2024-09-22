@@ -52,7 +52,7 @@
   select, textarea {
     width: 100%;
     padding: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     border: 1px solid #dadce0;
     border-radius: 4px;
     font-size: 14px;
@@ -61,22 +61,19 @@
 
   select[multiple] {
     height: auto;
-    margin-bottom: 8px;
   }
 
   .button-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
+    gap: 8px;
   }
 
   button {
     background-color: #1a73e8;
-    width: 240px;
     color: white;
     border: none;
-    padding: 8px 8px;
+    padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
@@ -98,24 +95,42 @@
 
   .select2-container {
     width: 100% !important;
-    margin-bottom: 10px;
+    margin-bottom: 16px !important;
   }
 
-  .select2-container--default .select2-selection--multiple {
-    border: 1px solid #dadce0;
-    border-radius: 4px;
+  .select2-container .select2-selection--single,
+  .select2-container .select2-selection--multiple {
+    height: auto;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered,
+  .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    line-height: 28px;
+    padding-left: 8px;
+    padding-right: 30px; /* Increased right padding */
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__clear,
+  .select2-container--default .select2-selection--multiple .select2-selection__clear {
+    right: 5px;
+    margin-right: 0;
   }
 
   .select2-container--default .select2-selection--multiple .select2-selection__choice {
-    background-color: #e8f0fe;
-    border: 1px solid #4285f4;
-    border-radius: 16px;
-    padding: 2px 8px;
+    padding: 2px 5px 2px 8px;
+    margin: 2px;
+    line-height: 1.2;
+    white-space: normal;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: calc(100% - 10px);
   }
 
   .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-    margin-right: 5px;
-    color: #4285f4;
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .select2-container--default .select2-search--inline .select2-search__field {
