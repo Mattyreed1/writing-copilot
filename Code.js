@@ -108,9 +108,15 @@ function getResourceSuggestions() {
   // Implement this function to get actual resource suggestions
 }
 
+<<<<<<< HEAD
 function applyEdits() {
   // Implement the logic to apply the edits
   // This function will be called when the "APPLY EDITS" button is clicked
 }
 
 // Add similar functions for applying rewrites, continuations, etc.
+=======
+function getScriptContent(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+>>>>>>> parent of 358e3d2... fix ui
