@@ -107,19 +107,14 @@
   .select2-container--default .select2-selection--multiple .select2-selection__rendered {
     line-height: 28px;
     padding-left: 8px;
-    padding-right: 30px; /* Increased right padding */
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__clear,
-  .select2-container--default .select2-selection--multiple .select2-selection__clear {
-    right: 5px;
-    margin-right: 0;
+    padding-right: 8px;
   }
 
   .select2-container--default .select2-selection--multiple .select2-selection__choice {
-    padding: 2px 5px 2px 8px;
+    padding: 2px 5px 2px 24px; /* Increased left padding for 'X' button */
     margin: 2px;
     line-height: 1.2;
+    position: relative;
     white-space: normal;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -128,9 +123,16 @@
 
   .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
     position: absolute;
-    right: 2px;
+    left: 2px; /* Moved to the left */
     top: 50%;
     transform: translateY(-50%);
+    margin-right: 0;
+    padding-right: 5px;
+  }
+
+  /* Ensure text doesn't overlap with 'X' button */
+  .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+    padding-left: 20px;
   }
 
   .select2-container--default .select2-search--inline .select2-search__field {
