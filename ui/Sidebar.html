@@ -7,13 +7,6 @@
   </head>
   <body>
     <div id="sidebar-content">
-      <div class="header">
-        <h1>Writing Copilot</h1>
-        <div class="header-icons">
-          <span class="icon">&#8942;</span>
-          <span class="icon">&#10005;</span>
-        </div>
-      </div>
 
       <div class="section">
         <h2>Set Writing Style</h2>
@@ -47,8 +40,6 @@
         <textarea id="selected-text" rows="4" readonly></textarea>
       </div>
 
-      <div id="results-container"></div>
-
       <div id="error-message" style="display:none;">
         <div class="error">An error occurred. Please try again.</div>
       </div>
@@ -77,6 +68,7 @@
 
       function onSidebarLoad() {
         google.script.run.withSuccessHandler(updateSelectedText).getSelectedText();
+        listenForSelectionChanges();
       }
 
       function runAction(action) {
@@ -97,6 +89,12 @@
       function showError(error) {
         document.getElementById('error-message').style.display = 'block';
         document.getElementById('error-message').innerText = error.message;
+      }
+
+      function listenForSelectionChanges() {
+        google.script.run.withSuccessHandler(function() {
+          console.log('Listening for selection changes');
+        }).listenForSelectionChanges();
       }
 
       // Initialize the sidebar

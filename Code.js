@@ -52,3 +52,16 @@ function generateContinuation(text) {
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
+
+function listenForSelectionChanges() {
+  ScriptApp.newTrigger('onSelectionChange')
+    .forDocument(DocumentApp.getActiveDocument())
+    .onSelectionChange()
+    .create();
+}
+
+function onSelectionChange(e) {
+  var text = getSelectedText();
+  var html = HtmlService.createHtmlOutput('<script>window.parent.updateSelectedText("' + text.replace(/"/g, '\\"') + '");</script>');
+  DocumentApp.getUi().showSidebar(html);
+}
