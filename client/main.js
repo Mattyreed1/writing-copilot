@@ -1,90 +1,80 @@
 function onSidebarLoad() {
-  console.log('Sidebar loaded');
-
-  // Event bindings
-  document.getElementById('edit-btn').onclick = function() { handleAIOperation('edit'); };
-  document.getElementById('rewrite-btn').onclick = function() { handleAIOperation('rewrite'); };
-  document.getElementById('continue-btn').onclick = function() { handleAIOperation('continue'); };
-  document.getElementById('find-quotes').onclick = handleFindQuotes;
-  document.getElementById('find-citations').onclick = handleFindResources;
-
-  // Load writer styles
-  google.script.run.withSuccessHandler(function(styles) {
-    var select = document.getElementById('writer-style-select');
-    styles.forEach(function(style) {
-      var option = document.createElement('option');
-      option.value = style;
-      option.textContent = style;
-      select.appendChild(option);
-    });
-  }).getWriterStyles();
-
-  // Load writing styles
-  google.script.run.withSuccessHandler(function(styles) {
-    var select = document.getElementById('writing-style-select');
-    styles.forEach(function(style) {
-      var option = document.createElement('option');
-      option.value = style;
-      option.textContent = style;
-      select.appendChild(option);
-    });
-  }).getWritingStyles();
-
-  // Check for initial text selection and update UI accordingly
-  checkTextSelection();
-
-  // Periodically check for text selection every second
-  setInterval(checkTextSelection, 1000);
+  google.script.run.withSuccessHandler(showCard).createHomepageCard();
 }
 
-function handleAIOperation(operation) {
-  var writerSelect = document.getElementById('writer-style-select');
-  var styleSelect = document.getElementById('writing-style-select');
-  var selectedWriters = Array.from(writerSelect.selectedOptions).map(option => option.value);
-  var selectedStyles = Array.from(styleSelect.selectedOptions).map(option => option.value);
+function showCard(cardJson) {
+  const card = JSON.parse(cardJson);
+  const app = document.getElementById('app');
+  app.innerHTML = ''; // Clear existing content
+  
+  // Render the card
+  const cardElement = renderCard(card);
+  app.appendChild(cardElement);
+}
 
-  if (!selectedWriters.length || !selectedStyles.length) {
-    alert('Please select at least one writer style and one writing style.');
-    return;
+function renderCard(card) {
+  const cardElement = document.createElement('div');
+  cardElement.className = 'card';
+
+  // Render header
+  if (card.header) {
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.textContent = card.header.title;
+    cardElement.appendChild(header);
   }
 
-  document.getElementById('ai-result').textContent = 'Loading...';
+  // Render sections
+  card.sections.forEach(section => {
+    const sectionElement = document.createElement('div');
+    sectionElement.className = 'card-section';
 
-  google.script.run
-    .withSuccessHandler(function(suggestion) {
-      if (suggestion.startsWith('Error:')) {
-        document.getElementById('ai-result').textContent = suggestion;
-      } else {
-        document.getElementById('ai-result').innerHTML = suggestion;
-      }
-    })
-    .withFailureHandler(function(error) {
-      document.getElementById('ai-result').textContent = 'Error: ' + error.message;
-    })
-    .getAISuggestions(selectedWriters, selectedStyles, operation);
+    section.widgets.forEach(widget => {
+      const widgetElement = renderWidget(widget);
+      sectionElement.appendChild(widgetElement);
+    });
+
+    cardElement.appendChild(sectionElement);
+  });
+
+  return cardElement;
 }
 
-function handleFindQuotes() {
-  google.script.run
-    .withSuccessHandler(function(quotes) {
-      document.getElementById('ai-result').innerHTML = quotes;
-    })
-    .withFailureHandler(function(error) {
-      document.getElementById('ai-result').textContent = 'Error: ' + error.message;
-    })
-    .findQuotes();
+function renderWidget(widget) {
+  switch (widget.type) {
+    case 'TextParagraph':
+      const p = document.createElement('p');
+      p.textContent = widget.text;
+      return p;
+    case 'TextButton':
+      const button = document.createElement('button');
+      button.textContent = widget.text;
+      button.onclick = () => handleButtonClick(widget.action.functionName);
+      return button;
+    // Add more widget types as needed
+  }
 }
 
-function handleFindResources() {
-  // Implement the logic to find resources
-  // Similar to handleFindQuotes
+function handleButtonClick(functionName) {
+  switch (functionName) {
+    case 'showEditResults':
+      google.script.run.withSuccessHandler(showCard).createEditResultsCard();
+      break;
+    case 'showRewriteResults':
+      google.script.run.withSuccessHandler(showCard).createRewriteResultsCard();
+      break;
+    case 'showContinuationResults':
+      google.script.run.withSuccessHandler(showCard).createContinuationResultsCard();
+      break;
+    case 'showQuoteResults':
+      google.script.run.withSuccessHandler(showCard).createQuoteResultsCard();
+      break;
+    case 'showResourceResults':
+      google.script.run.withSuccessHandler(showCard).createResourceResultsCard();
+      break;
+    // Add more cases as needed
+  }
 }
 
-function checkTextSelection() {
-  // Implement the logic to check text selection and update UI
-}
-
-// This function will be called from the server-side to get the script content
-function getScriptContent() {
-  return HtmlService.createHtmlOutputFromFile('client/Main').getContent();
-}
+// Call onSidebarLoad when the page loads
+window.onload = onSidebarLoad;
