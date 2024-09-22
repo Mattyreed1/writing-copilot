@@ -6,33 +6,75 @@
     <?!= include('ui/CSS'); ?>
   </head>
   <body>
-    <div class="sidebar branding-below">
-      <div class="card" id="main-card">
-        <div class="block form-group">
-          <label for="selected-text"><b>Selected Text</b></label>
-          <textarea class="width-100" id="selected-text" rows="4" readonly></textarea>
+    <div id="sidebar-content">
+      <div class="header">
+        <h1>Writing Copilot</h1>
+        <div class="header-icons">
+          <span class="icon">&#8942;</span>
+          <span class="icon">&#10005;</span>
         </div>
-        
-        <div class="block" id="action-buttons">
-          <button class="action" data-action="edit">Edit</button>
-          <button class="action" data-action="rewrite">Rewrite</button>
-          <button class="action" data-action="continue">Continue</button>
+      </div>
+
+      <div class="section">
+        <h2>Set Writing Style</h2>
+        <select id="writer-select" multiple>
+          <option value="" disabled selected>Select writers...</option>
+        </select>
+        <select id="style-select" multiple>
+          <option value="" disabled selected>Select styles...</option>
+        </select>
+      </div>
+
+      <div class="section">
+        <h2>Generate Suggestions</h2>
+        <div class="button-container">
+          <button class="action" data-action="edit">EDIT</button>
+          <button class="action" data-action="rewrite">REWRITE</button>
+          <button class="action" data-action="continue">CONTINUE</button>
         </div>
+      </div>
+
+      <div class="section">
+        <h2>Find Quotes & Resources</h2>
+        <div class="button-container">
+          <button id="find-quotes">FIND QUOTES</button>
+          <button id="find-resources">FIND RESOURCES</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Highlighted text</h2>
+        <textarea id="selected-text" rows="4" readonly></textarea>
       </div>
 
       <div id="results-container"></div>
 
-      <div class="block" id="error-message" style="display:none;">
+      <div id="error-message" style="display:none;">
         <div class="error">An error occurred. Please try again.</div>
       </div>
     </div>
 
-    <div class="sidebar bottom">
-      <img alt="Add-on logo" class="logo" src="https://www.gstatic.com/images/branding/product/1x/translate_48dp.png" width="27" height="27">
-      <span class="gray branding-text">Writing Copilot by YourCompany</span>
-    </div>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script>
+      $(document).ready(function() {
+        $('#writer-select').select2();
+        $('#style-select').select2();
+
+        google.script.run.withSuccessHandler(function(writers) {
+          writers.forEach(function(writer) {
+            $('#writer-select').append(new Option(writer, writer));
+          });
+        }).getWriterStyles();
+
+        google.script.run.withSuccessHandler(function(styles) {
+          styles.forEach(function(style) {
+            $('#style-select').append(new Option(style, style));
+          });
+        }).getWritingStyles();
+      });
+
       function onSidebarLoad() {
         google.script.run.withSuccessHandler(updateSelectedText).getSelectedText();
       }
@@ -65,6 +107,14 @@
         button.addEventListener('click', function() {
           runAction(this.dataset.action);
         });
+      });
+
+      document.getElementById('find-quotes').addEventListener('click', function() {
+        // Implement find quotes functionality
+      });
+
+      document.getElementById('find-resources').addEventListener('click', function() {
+        // Implement find resources functionality
       });
     </script>
   </body>
