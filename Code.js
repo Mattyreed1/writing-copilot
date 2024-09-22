@@ -37,7 +37,27 @@ function getSelectedText() {
 function generateEdit(text, selectedWriters, selectedStyles) {
   var aiService = new AIService();
   var result = aiService.getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
-  return "<div class='block'><h3>Edit Suggestion</h3><div>" + result + "</div></div>";
+  return result;
+}
+
+function showEditCard(editResult) {
+  var card = CardService.newCardBuilder();
+  
+  card.setHeader(CardService.newCardHeader().setTitle("Edit Suggestions"));
+  
+  var section = CardService.newCardSection()
+    .addWidget(CardService.newTextParagraph().setText(editResult))
+    .addWidget(CardService.newButtonSet()
+      .addButton(CardService.newTextButton()
+        .setText("Apply Edit")
+        .setOnClickAction(CardService.newAction().setFunctionName("applyEdit"))));
+  
+  card.addSection(section);
+  
+  var nav = CardService.newNavigation().pushCard(card.build());
+  return CardService.newActionResponseBuilder()
+    .setNavigation(nav)
+    .build();
 }
 
 function generateRewrite(text) {
@@ -83,8 +103,18 @@ function removeTrigger() {
 }
 
 function applyEdit(e) {
-  var text = e.commonEventObject.parameters.text;
-  DocumentApp.getActiveDocument().getBody().appendParagraph(text);
+  var text = e.parameters.text;
+  var doc = DocumentApp.getActiveDocument();
+  var selection = doc.getSelection();
+  
+  if (selection) {
+    var elements = selection.getRangeElements();
+    if (elements.length > 0) {
+      var element = elements[0].getElement();
+      element.asText().setText(text);
+    }
+  }
+  
   return CardService.newActionResponseBuilder()
     .setNotification(CardService.newNotification()
       .setText("Edit applied successfully!"))

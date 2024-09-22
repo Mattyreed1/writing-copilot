@@ -21,7 +21,7 @@
       <div class="section">
         <h2>Generate Suggestions</h2>
         <div class="button-container">
-          <button id="edit-button" class="action" data-action="edit">EDIT</button>
+          <button id="edit-button" class="action" onclick="handleEditAction()">EDIT</button>
           <button class="action" data-action="rewrite">REWRITE</button>
           <button class="action" data-action="continue">CONTINUE</button>
         </div>
@@ -80,13 +80,12 @@
         var selectedWriters = $('#writer-select').val();
         var selectedStyles = $('#style-select').val();
 
-        // Show loading indicator
         showLoading(true);
 
         google.script.run
           .withSuccessHandler(function(response) {
             showLoading(false);
-            displayEditResults(response);
+            google.script.run.showEditCard(response);
           })
           .withFailureHandler(function(error) {
             showLoading(false);
