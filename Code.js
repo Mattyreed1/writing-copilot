@@ -14,71 +14,11 @@ function onInstall(e) {
 }
 
 function showSidebar() {
-  const html = HtmlService.createHtmlOutputFromFile('ui/Sidebar')
+  const html = HtmlService.createHtmlOutputFromFile('Sidebar')
     .setTitle('Writing Copilot');
   DocumentApp.getUi().showSidebar(html);
 }
 
-function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
-}
-
-function getWriterStyles() {
-  return StyleService.getWriterStyles();
-}
-
-function getWritingStyles() {
-  return StyleService.getWritingStyles();
-}
-
-function getAISuggestions(selectedWriters, selectedStyles, operation) {
-  return AIService.getAISuggestions(selectedWriters, selectedStyles, operation);
-}
-
-function findQuotes() {
-  return CitationService.findQuotes();
-}
-
-function findCitations() {
-  return CitationService.findCitations();
-}
-
-function getSelectedText() {
-  var selection = DocumentApp.getActiveDocument().getSelection();
-  if (selection) {
-    var elements = selection.getSelectedElements();
-    return elements.map(function(element) {
-      if (element.isPartial()) {
-        return element.getElement().asText().getSubstring(element.getStartOffset(), element.getEndOffsetInclusive());
-      } else {
-        return element.getElement().asText().getText();
-      }
-    }).join('\n');
-  }
-  return '';
-}
-
-function getScriptContent(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
-}
-
-function getCssContent() {
-  return HtmlService.createHtmlOutputFromFile('ui/CSS').getContent();
-}
-
-/**
- * Callback for rendering the homepage card.
- * @return {CardService.Card} The card to show to the user.
- */
-function onHomepage(e) {
-  console.log('Handling homepage view');
-  return createHomepageCard();
-}
-
-/**
- * Creates the main card for the add-on homepage.
- * @return {CardService.Card} The assembled card.
- */
 function createHomepageCard() {
   const card = CardService.newCardBuilder();
   card.setHeader(CardService.newCardHeader().setTitle('Writing Copilot'));
@@ -105,79 +45,72 @@ function createHomepageCard() {
     .addWidget(CardService.newTextButton().setText('FIND RESOURCES').setOnClickAction(CardService.newAction().setFunctionName('showResourceResults')));
   card.addSection(findSection);
 
-  return JSON.stringify(card.build());
-}
-
-/**
- * Callback for the EDIT button.
- * @param {Object} e The event object.
- * @return {CardService.ActionResponse} The action response to apply.
- */
-function handleEdit(e) {
-  console.log('Handling edit action');
-  var card = createResultCard('Edit');
-  return CardService.newActionResponseBuilder()
-    .setNavigation(CardService.newNavigation().pushCard(card))
-    .build();
-}
-
-// Similar functions for handleRewrite and handleContinue...
-
-/**
- * Creates a card to display the result of an action.
- * @param {string} action The action that was performed.
- * @return {CardService.Card} The card to show to the user.
- */
-function createResultCard(action) {
-  var card = CardService.newCardBuilder();
-  
-  card.setHeader(CardService.newCardHeader().setTitle(action + ' Result'));
-  
-  var section = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText('Your ' + action.toLowerCase() + ' result will appear here.'));
-  
-  card.addSection(section);
-  
   return card.build();
 }
 
-// Add imports for the new components
-import ResultsContainer from './components/ResultsContainer.js';
-
-// Update the function that displays results to use the new ResultsContainer
-function displayResults(results) {
-  const container = new ResultsContainer(results);
-  container.render();
-}
-
 function showEditResults() {
-  const editResults = new EditResults(getEditSuggestions());
-  return JSON.stringify(editResults.build());
+  const results = getEditSuggestions();
+  const card = CardService.newCardBuilder();
+  card.setHeader(CardService.newCardHeader().setTitle('Suggested Edits'));
+
+  results.forEach((result, index) => {
+    const section = CardService.newCardSection()
+      .addWidget(CardService.newTextParagraph().setText(result.text))
+      .addWidget(CardService.newTextParagraph().setText('Explain why you should make these changes and how it improves the writing.'));
+    card.addSection(section);
+  });
+
+  const applyButton = CardService.newTextButton()
+    .setText('APPLY EDITS')
+    .setOnClickAction(CardService.newAction().setFunctionName('applyEdits'));
+  card.addSection(CardService.newCardSection().addWidget(applyButton));
+
+  return card.build();
 }
 
 function showRewriteResults() {
-  const rewriteResults = new RewriteResults(getRewriteSuggestions());
-  return JSON.stringify(rewriteResults.build());
+  // Similar to showEditResults, but for rewrites
 }
 
 function showContinuationResults() {
-  const continuationResults = new ContinuationResults(getContinuationSuggestions());
-  return JSON.stringify(continuationResults.build());
+  // Similar to showEditResults, but for continuations
 }
 
 function showQuoteResults() {
-  const quoteResults = new QuoteResults(getQuoteSuggestions());
-  return JSON.stringify(quoteResults.build());
+  // Similar to showEditResults, but for quotes
 }
 
 function showResourceResults() {
-  const resourceResults = new ResourceResults(getResourceSuggestions());
-  return JSON.stringify(resourceResults.build());
+  // Similar to showEditResults, but for resources
 }
 
-// Implement these functions to get actual suggestions
-function getEditSuggestions() { /* ... */ }
-function getRewriteSuggestions() { /* ... */ }
-function getContinuationSuggestions() { /* ... */ }
-function getQuoteSuggestions() { /* ... */ }
-function getResourceSuggestions() { /* ... */ }
+function getEditSuggestions() {
+  // Implement this function to get actual edit suggestions
+  return [
+    { text: 'Sample edit suggestion 1' },
+    { text: 'Sample edit suggestion 2' },
+  ];
+}
+
+function getRewriteSuggestions() {
+  // Implement this function to get actual rewrite suggestions
+}
+
+function getContinuationSuggestions() {
+  // Implement this function to get actual continuation suggestions
+}
+
+function getQuoteSuggestions() {
+  // Implement this function to get actual quote suggestions
+}
+
+function getResourceSuggestions() {
+  // Implement this function to get actual resource suggestions
+}
+
+function applyEdits() {
+  // Implement the logic to apply the edits
+  // This function will be called when the "APPLY EDITS" button is clicked
+}
+
+// Add similar functions for applying rewrites, continuations, etc.
