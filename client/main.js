@@ -1,39 +1,33 @@
-$(document).ready(function() {
+function onLoad() {
   console.log('Sidebar loaded');
 
   // Event bindings
-  $('#edit-btn').click(() => handleAIOperation('edit'));
-  $('#rewrite-btn').click(() => handleAIOperation('rewrite'));
-  $('#continue-btn').click(() => handleAIOperation('continue'));
-  $('#find-quotes').click(handleFindQuotes);
-  $('#find-citations').click(handleFindResources);
-
-  // Initialize Select2 for multiple select inputs
-  $('#writer-style-select, #writing-style-select').select2({
-    width: '100%',
-    placeholder: function() {
-      return $(this).attr('placeholder');
-    },
-    allowClear: true,
-    multiple: true
-  });
+  document.getElementById('edit-btn').addEventListener('click', () => handleAIOperation('edit'));
+  document.getElementById('rewrite-btn').addEventListener('click', () => handleAIOperation('rewrite'));
+  document.getElementById('continue-btn').addEventListener('click', () => handleAIOperation('continue'));
+  document.getElementById('find-quotes').addEventListener('click', handleFindQuotes);
+  document.getElementById('find-citations').addEventListener('click', handleFindResources);
 
   // Load writer styles from the server and populate the select input
   google.script.run.withSuccessHandler(function(styles) {
-    var select = $('#writer-style-select');
+    var select = document.getElementById('writer-style-select');
     styles.forEach(function(style) {
-      select.append($('<option></option>').val(style).text(style));
+      var option = document.createElement('option');
+      option.value = style;
+      option.textContent = style;
+      select.appendChild(option);
     });
-    select.trigger('change');
   }).getWriterStyles();
 
   // Load writing styles from the server and populate the select input
   google.script.run.withSuccessHandler(function(styles) {
-    var select = $('#writing-style-select');
+    var select = document.getElementById('writing-style-select');
     styles.forEach(function(style) {
-      select.append($('<option></option>').val(style).text(style));
+      var option = document.createElement('option');
+      option.value = style;
+      option.textContent = style;
+      select.appendChild(option);
     });
-    select.trigger('change');
   }).getWritingStyles();
 
   // Check for initial text selection and update UI accordingly
@@ -41,63 +35,54 @@ $(document).ready(function() {
 
   // Periodically check for text selection every second
   setInterval(checkTextSelection, 1000);
-});
+}
 
 function handleAIOperation(operation) {
-  var selectedWriters = $('#writer-style-select').select2('data').map(item => item.text);
-  var selectedStyles = $('#writing-style-select').select2('data').map(item => item.text);
+  var writerSelect = document.getElementById('writer-style-select');
+  var styleSelect = document.getElementById('writing-style-select');
+  var selectedWriters = Array.from(writerSelect.selectedOptions).map(option => option.value);
+  var selectedStyles = Array.from(styleSelect.selectedOptions).map(option => option.value);
 
   if (!selectedWriters.length || !selectedStyles.length) {
     alert('Please select at least one writer style and one writing style.');
     return;
   }
 
-  $('#ai-result').text('Loading...');
+  document.getElementById('ai-result').textContent = 'Loading...';
 
   google.script.run
     .withSuccessHandler(function(suggestion) {
       if (suggestion.startsWith('Error:')) {
-        $('#ai-result').text(suggestion);
+        document.getElementById('ai-result').textContent = suggestion;
       } else {
-        $('#ai-result').html(suggestion);
+        document.getElementById('ai-result').innerHTML = suggestion;
       }
     })
     .withFailureHandler(function(error) {
-      $('#ai-result').text('Error: ' + error.message);
+      document.getElementById('ai-result').textContent = 'Error: ' + error.message;
     })
     .getAISuggestions(selectedWriters, selectedStyles, operation);
 }
 
 function handleFindQuotes() {
-  // Implement the logic to find quotes
   google.script.run
     .withSuccessHandler(function(quotes) {
-      $('#ai-result').html(quotes);
+      document.getElementById('ai-result').innerHTML = quotes;
     })
     .withFailureHandler(function(error) {
-      $('#ai-result').text('Error: ' + error.message);
+      document.getElementById('ai-result').textContent = 'Error: ' + error.message;
     })
     .findQuotes();
 }
 
 function handleFindResources() {
   // Implement the logic to find resources
-  google.script.run
-    .withSuccessHandler(function(resources) {
-      $('#citations-output').html(resources);
-    })
-    .withFailureHandler(function(error) {
-      $('#citations-output').text('Error: ' + error.message);
-    })
-    .findCitations();
+  // Similar to handleFindQuotes
 }
 
 function checkTextSelection() {
-  google.script.run.withSuccessHandler(updateUIBasedOnSelection).getSelectedText();
+  // Implement the logic to check text selection and update UI
 }
 
-function updateUIBasedOnSelection(selectedText) {
-  const hasSelection = selectedText.trim().length > 0;
-  $('#no-selection-message').toggle(!hasSelection);
-  $('#edit-btn, #rewrite-btn, #continue-btn, #find-quotes, #find-citations').prop('disabled', !hasSelection);
-}
+// Call onLoad when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', onLoad);
