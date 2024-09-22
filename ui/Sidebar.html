@@ -21,9 +21,9 @@
       <div class="section">
         <h2>Generate Suggestions</h2>
         <div class="button-container">
+          <button id="edit-button" class="action" data-action="edit">EDIT</button>
           <button class="action" data-action="rewrite">REWRITE</button>
           <button class="action" data-action="continue">CONTINUE</button>
-          <button class="action" data-action="edit">EDIT</button>
         </div>
       </div>
 
@@ -63,7 +63,78 @@
             $('#style-select').append(new Option(style, style));
           });
         }).getWritingStyles();
+
+        // Add event listener for the Edit button
+        document.getElementById('edit-button').addEventListener('click', function() {
+          handleEditAction();
+        });
       });
+
+      function handleEditAction() {
+        var text = document.getElementById('selected-text').textContent;
+        if (!text || text === 'No text selected') {
+          showError('Please select some text to edit.');
+          return;
+        }
+
+        var selectedWriters = $('#writer-select').val();
+        var selectedStyles = $('#style-select').val();
+
+        // Show loading indicator
+        showLoading(true);
+
+        google.script.run
+          .withSuccessHandler(function(response) {
+            showLoading(false);
+            displayEditResults(response);
+          })
+          .withFailureHandler(function(error) {
+            showLoading(false);
+            showError(error.message || 'An error occurred while editing the text.');
+          })
+          .generateEdit(text, selectedWriters, selectedStyles);
+      }
+
+      function displayEditResults(result) {
+        // Create a new div to display the results
+        var resultsDiv = document.createElement('div');
+        resultsDiv.innerHTML = result;
+        
+        // Clear previous results and add new ones
+        var contentDiv = document.getElementById('sidebar-content');
+        var existingResults = contentDiv.querySelector('.edit-results');
+        if (existingResults) {
+          contentDiv.removeChild(existingResults);
+        }
+        resultsDiv.className = 'edit-results';
+        contentDiv.appendChild(resultsDiv);
+      }
+
+      function showMessage(message) {
+        var messageElement = document.getElementById('message');
+        if (!messageElement) {
+          messageElement = document.createElement('div');
+          messageElement.id = 'message';
+          document.body.appendChild(messageElement);
+        }
+        messageElement.textContent = message;
+        messageElement.style.display = 'block';
+        setTimeout(function() {
+          messageElement.style.display = 'none';
+        }, 3000);
+      }
+
+      function showLoading(isLoading) {
+        var loadingElement = document.getElementById('loading');
+        if (!loadingElement) {
+          loadingElement = document.createElement('div');
+          loadingElement.id = 'loading';
+          loadingElement.innerHTML = 'Loading...';
+          loadingElement.style.display = 'none';
+          document.body.appendChild(loadingElement);
+        }
+        loadingElement.style.display = isLoading ? 'block' : 'none';
+      }
 
       function onSidebarLoad() {
         google.script.run.withSuccessHandler(updateSelectedText).getSelectedText();

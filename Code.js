@@ -34,8 +34,9 @@ function getSelectedText() {
   return 'No text selected';
 }
 
-function generateEdit(text) {
-  var result = callOpenAI("Edit the following text: " + text);
+function generateEdit(text, selectedWriters, selectedStyles) {
+  var aiService = new AIService();
+  var result = aiService.getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
   return "<div class='block'><h3>Edit Suggestion</h3><div>" + result + "</div></div>";
 }
 
@@ -79,4 +80,13 @@ function removeTrigger() {
       ScriptApp.deleteTrigger(triggers[i]);
     }
   }
+}
+
+function applyEdit(e) {
+  var text = e.commonEventObject.parameters.text;
+  DocumentApp.getActiveDocument().getBody().appendParagraph(text);
+  return CardService.newActionResponseBuilder()
+    .setNotification(CardService.newNotification()
+      .setText("Edit applied successfully!"))
+    .build();
 }
