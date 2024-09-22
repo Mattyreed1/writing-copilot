@@ -1,14 +1,14 @@
-function onLoad() {
+function onSidebarLoad() {
   console.log('Sidebar loaded');
 
   // Event bindings
-  document.getElementById('edit-btn').addEventListener('click', () => handleAIOperation('edit'));
-  document.getElementById('rewrite-btn').addEventListener('click', () => handleAIOperation('rewrite'));
-  document.getElementById('continue-btn').addEventListener('click', () => handleAIOperation('continue'));
-  document.getElementById('find-quotes').addEventListener('click', handleFindQuotes);
-  document.getElementById('find-citations').addEventListener('click', handleFindResources);
+  document.getElementById('edit-btn').onclick = function() { handleAIOperation('edit'); };
+  document.getElementById('rewrite-btn').onclick = function() { handleAIOperation('rewrite'); };
+  document.getElementById('continue-btn').onclick = function() { handleAIOperation('continue'); };
+  document.getElementById('find-quotes').onclick = handleFindQuotes;
+  document.getElementById('find-citations').onclick = handleFindResources;
 
-  // Load writer styles from the server and populate the select input
+  // Load writer styles
   google.script.run.withSuccessHandler(function(styles) {
     var select = document.getElementById('writer-style-select');
     styles.forEach(function(style) {
@@ -19,7 +19,7 @@ function onLoad() {
     });
   }).getWriterStyles();
 
-  // Load writing styles from the server and populate the select input
+  // Load writing styles
   google.script.run.withSuccessHandler(function(styles) {
     var select = document.getElementById('writing-style-select');
     styles.forEach(function(style) {
@@ -84,5 +84,7 @@ function checkTextSelection() {
   // Implement the logic to check text selection and update UI
 }
 
-// Call onLoad when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', onLoad);
+// This function will be called from the server-side to get the script content
+function getScriptContent() {
+  return HtmlService.createHtmlOutputFromFile('client/Main').getContent();
+}

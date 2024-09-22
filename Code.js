@@ -57,3 +57,7 @@ function getSelectedText() {
   }
   return '';
 }
+
+function getScriptContent(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}

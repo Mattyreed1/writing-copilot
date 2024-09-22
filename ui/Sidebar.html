@@ -37,6 +37,13 @@
 
     <div id="citations-output" class="result-container"></div>
 
-    <?!= include('client/main'); ?>
+    <script>
+      <?!= getMainGsContent(); ?>
+      
+      // Call the onSidebarLoad function when the page loads
+      google.script.run.withSuccessHandler(function() {
+        onSidebarLoad();
+      }).getScriptContent('client/Main');
+    </script>
   </body>
 </html>
