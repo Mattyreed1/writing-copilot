@@ -64,6 +64,27 @@
           });
         }).getWritingStyles();
 
+        // Create the selection change trigger when the sidebar loads
+        google.script.run.createSelectionChangeTrigger();
+
+        // Debounce function to limit how often a function is called
+        function debounce(func, wait) {
+          let timeout;
+          return function executedFunction(...args) {
+            const later = () => {
+              clearTimeout(timeout);
+              func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+          };
+        }
+
+        // Update the selected text in the sidebar
+        const updateSelectedText = debounce(function(text) {
+          $('#selected-text').text(text || 'No text selected');
+        }, 300);  // 300ms debounce time
+
         // Add event listener for the Edit button
         document.getElementById('edit-button').addEventListener('click', handleEditAction);
       });
@@ -83,14 +104,21 @@
         google.script.run
           .withSuccessHandler(function(response) {
             showLoading(false);
-            // The response is now a Navigation object, which will automatically
-            // cause the new card to slide in
+            console.log('Edit card created successfully');
           })
           .withFailureHandler(function(error) {
             showLoading(false);
             showError(error.message || 'An error occurred while editing the text.');
           })
-          .generateEdit(text, selectedWriters, selectedStyles);
+          .onEditButtonClicked({
+            commonEventObject: {
+              formInputs: {
+                selectedText: text,
+                selectedWriters: selectedWriters,
+                selectedStyles: selectedStyles
+              }
+            }
+          });
       }
 
       function displayEditResults(result) {
@@ -188,12 +216,6 @@
       document.getElementById('find-resources').addEventListener('click', function() {
         // Implement find resources functionality
       });
-
-      function updateSelectedText() {
-        google.script.run.withSuccessHandler(function(text) {
-          $('#selected-text').text(text);
-        }).getSelectedText();
-      }
 
       // Update selected text every 500 milliseconds
       setInterval(updateSelectedText, 500);

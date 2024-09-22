@@ -37,10 +37,10 @@ function getSelectedText() {
 function generateEdit(text, selectedWriters, selectedStyles) {
   var aiService = new AIService();
   var result = aiService.getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
-  return showEditCard(result, text);
+  return createEditCard(result, text);
 }
 
-function showEditCard(editResult, originalText) {
+function createEditCard(editResult, originalText) {
   var card = CardService.newCardBuilder();
   
   card.setHeader(CardService.newCardHeader().setTitle("Suggested Edits"));
@@ -64,7 +64,7 @@ function showEditCard(editResult, originalText) {
   
   card.addSection(section);
   
-  return CardService.newNavigation().pushCard(card.build());
+  return card.build();
 }
 
 function generateRewrite(text) {
@@ -91,8 +91,7 @@ function listenForSelectionChanges() {
 
 function onSelectionChange(e) {
   var selectedText = getSelectedText();
-  var html = HtmlService.createHtmlOutput('<script>window.parent.updateSelectedText(' + JSON.stringify(selectedText) + ');</script>');
-  DocumentApp.getUi().showSidebar(html);
+  updateSidebarText(selectedText);
 }
 
 function updateSidebarText(text) {
@@ -127,4 +126,33 @@ function applyEdit(e) {
     .setNotification(CardService.newNotification()
       .setText(`Edit ${index + 1} applied successfully!`))
     .build();
+}
+
+function onEditButtonClicked(e) {
+  var text = e.commonEventObject.formInputs.selectedText;
+  var selectedWriters = e.commonEventObject.formInputs.selectedWriters;
+  var selectedStyles = e.commonEventObject.formInputs.selectedStyles;
+
+  var card = generateEdit(text, selectedWriters, selectedStyles);
+  
+  return CardService.newActionResponseBuilder()
+    .setNavigation(CardService.newNavigation().pushCard(card))
+    .build();
+}
+
+function createSelectionChangeTrigger() {
+  var doc = DocumentApp.getActiveDocument();
+  ScriptApp.newTrigger('onSelectionChange')
+    .forDocument(doc.getId())
+    .onSelectionChange()
+    .create();
+}
+
+function onClose() {
+  var triggers = ScriptApp.getUserTriggers(DocumentApp.getActiveDocument());
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'onSelectionChange') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
 }
