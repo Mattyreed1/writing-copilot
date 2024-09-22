@@ -61,3 +61,7 @@ function getSelectedText() {
 function getScriptContent(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
+
+function getCssContent() {
+  return HtmlService.createHtmlOutputFromFile('ui/CSS').getContent();
+}
