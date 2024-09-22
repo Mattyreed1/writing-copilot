@@ -13,7 +13,7 @@ function onInstall(e) {
 }
 
 function showSidebar() {
-  var html = HtmlService.createTemplateFromFile('Sidebar')
+  var html = HtmlService.createTemplateFromFile('ui/Sidebar')
       .evaluate()
       .setTitle('Writing Copilot')
       .setSandboxMode(HtmlService.SandboxMode.IFRAME);
