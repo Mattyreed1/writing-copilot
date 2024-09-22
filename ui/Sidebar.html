@@ -6,53 +6,66 @@
     <?!= include('ui/CSS'); ?>
   </head>
   <body>
-<<<<<<< HEAD
-    <div id="app">
-      <!-- The app content will be dynamically inserted here -->
-    </div>
-    
-    <?!= include('client/main'); ?>
-=======
-    <div id="no-selection-message">Select text in the Google doc.</div>
-    <div class="section">
-      <h2>Set Writing Style</h2>
-      <select id="writer-style-select" multiple>
-        <option value="">SELECT WRITER</option>
-      </select>
-      <select id="writing-style-select" multiple>
-        <option value="">SELECT STYLE</option>
-      </select>
-    </div>
+    <div class="sidebar branding-below">
+      <div class="card" id="main-card">
+        <div class="block form-group">
+          <label for="selected-text"><b>Selected Text</b></label>
+          <textarea class="width-100" id="selected-text" rows="4" readonly></textarea>
+        </div>
+        
+        <div class="block" id="action-buttons">
+          <button class="action" data-action="edit">Edit</button>
+          <button class="action" data-action="rewrite">Rewrite</button>
+          <button class="action" data-action="continue">Continue</button>
+        </div>
+      </div>
 
-    <div class="section">
-      <h2>Generate Suggestions</h2>
-      <div class="button-container">
-        <button id="edit-btn" disabled>EDIT</button>
-        <button id="rewrite-btn" disabled>REWRITE</button>
-        <button id="continue-btn" disabled>CONTINUE</button>
+      <div id="results-container"></div>
+
+      <div class="block" id="error-message" style="display:none;">
+        <div class="error">An error occurred. Please try again.</div>
       </div>
     </div>
 
-    <div id="ai-result" class="result-container"></div>
-
-    <div class="section">
-      <h2>Find Quotes & Resources</h2>
-      <div class="button-container">
-        <button id="find-quotes" disabled>QUOTES</button>
-        <button id="find-citations" disabled>RESOURCES</button>
-      </div>
+    <div class="sidebar bottom">
+      <img alt="Add-on logo" class="logo" src="https://www.gstatic.com/images/branding/product/1x/translate_48dp.png" width="27" height="27">
+      <span class="gray branding-text">Writing Copilot by YourCompany</span>
     </div>
 
-    <div id="citations-output" class="result-container"></div>
-
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <?!= include('components/ResultsContainer'); ?>
+    <?!= include('src/components/ContinuationResults'); ?>
+    <?!= include('src/components/RewriteResults'); ?>
     <script>
-      <?!= getMainGsContent(); ?>
-      
-      // Call the onSidebarLoad function when the page loads
-      google.script.run.withSuccessHandler(function() {
-        onSidebarLoad();
-      }).getScriptContent('client/Main');
+      $(function() {
+        $('.action').click(function() {
+          runAction($(this).data('action'));
+        });
+        
+        google.script.run.withSuccessHandler(updateSelectedText)
+          .withFailureHandler(showError)
+          .getSelectedText();
+      });
+
+      function updateSelectedText(text) {
+        $('#selected-text').val(text);
+      }
+
+      function runAction(action) {
+        $('#error-message').hide();
+        $('#main-card').hide();
+        showResultsContainer(action);
+        
+        google.script.run.withSuccessHandler(function(results) {
+          displayResults(action, results);
+        })
+          .withFailureHandler(showError)
+          [`generate${action.charAt(0).toUpperCase() + action.slice(1)}`]($('#selected-text').val());
+      }
+
+      function showError(msg) {
+        $('#error-message').text(msg).show();
+      }
     </script>
->>>>>>> parent of 358e3d2... fix ui
   </body>
 </html>
