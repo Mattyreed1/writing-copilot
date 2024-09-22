@@ -21,7 +21,7 @@
       <div class="section">
         <h2>Generate Suggestions</h2>
         <div class="button-container">
-          <button id="edit-button" class="action" onclick="handleEditAction()">EDIT</button>
+          <button id="edit-button" class="action">EDIT</button>
           <button class="action" data-action="rewrite">REWRITE</button>
           <button class="action" data-action="continue">CONTINUE</button>
         </div>
@@ -65,9 +65,7 @@
         }).getWritingStyles();
 
         // Add event listener for the Edit button
-        document.getElementById('edit-button').addEventListener('click', function() {
-          handleEditAction();
-        });
+        document.getElementById('edit-button').addEventListener('click', handleEditAction);
       });
 
       function handleEditAction() {
@@ -85,7 +83,8 @@
         google.script.run
           .withSuccessHandler(function(response) {
             showLoading(false);
-            google.script.run.showEditCard(response);
+            // The response is now a Navigation object, which will automatically
+            // cause the new card to slide in
           })
           .withFailureHandler(function(error) {
             showLoading(false);

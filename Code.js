@@ -37,27 +37,34 @@ function getSelectedText() {
 function generateEdit(text, selectedWriters, selectedStyles) {
   var aiService = new AIService();
   var result = aiService.getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
-  return result;
+  return showEditCard(result, text);
 }
 
-function showEditCard(editResult) {
+function showEditCard(editResult, originalText) {
   var card = CardService.newCardBuilder();
   
-  card.setHeader(CardService.newCardHeader().setTitle("Edit Suggestions"));
+  card.setHeader(CardService.newCardHeader().setTitle("Suggested Edits"));
   
   var section = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText(editResult))
-    .addWidget(CardService.newButtonSet()
-      .addButton(CardService.newTextButton()
-        .setText("Apply Edit")
-        .setOnClickAction(CardService.newAction().setFunctionName("applyEdit"))));
+    .addWidget(CardService.newTextParagraph().setText("Original text:"))
+    .addWidget(CardService.newTextParagraph().setText(originalText))
+    .addWidget(CardService.newDivider())
+    .addWidget(CardService.newTextParagraph().setText("Suggested edits:"))
+    .addWidget(CardService.newTextParagraph().setText(editResult));
+
+  // Add multiple edit suggestions
+  var suggestions = editResult.split('\n\n');
+  suggestions.forEach((suggestion, index) => {
+    section.addWidget(CardService.newTextButton()
+      .setText(`Apply Edit ${index + 1}`)
+      .setOnClickAction(CardService.newAction()
+        .setFunctionName("applyEdit")
+        .setParameters({text: suggestion, index: index.toString()})));
+  });
   
   card.addSection(section);
   
-  var nav = CardService.newNavigation().pushCard(card.build());
-  return CardService.newActionResponseBuilder()
-    .setNavigation(nav)
-    .build();
+  return CardService.newNavigation().pushCard(card.build());
 }
 
 function generateRewrite(text) {
@@ -104,6 +111,7 @@ function removeTrigger() {
 
 function applyEdit(e) {
   var text = e.parameters.text;
+  var index = parseInt(e.parameters.index);
   var doc = DocumentApp.getActiveDocument();
   var selection = doc.getSelection();
   
@@ -117,6 +125,6 @@ function applyEdit(e) {
   
   return CardService.newActionResponseBuilder()
     .setNotification(CardService.newNotification()
-      .setText("Edit applied successfully!"))
+      .setText(`Edit ${index + 1} applied successfully!`))
     .build();
 }
