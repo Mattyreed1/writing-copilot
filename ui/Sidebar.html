@@ -4,6 +4,12 @@
     <base target="_top">
     <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
     <?!= include('ui/CSS'); ?>
+    <?!= include('components/ResultsContainer'); ?>
+    <?!= include('components/EditResults'); ?>
+    <?!= include('components/RewriteResults'); ?>
+    <?!= include('components/ContinuationResults'); ?>
+    <?!= include('components/QuoteResults'); ?>
+    <?!= include('components/ResourceResults'); ?>
   </head>
   <body>
     <div class="sidebar branding-below">
@@ -34,8 +40,8 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <?!= include('components/ResultsContainer'); ?>
-    <?!= include('src/components/ContinuationResults'); ?>
-    <?!= include('src/components/RewriteResults'); ?>
+    <?!= include('components/ContinuationResults'); ?>
+    <?!= include('components/RewriteResults'); ?>
     <script>
       $(function() {
         $('.action').click(function() {
