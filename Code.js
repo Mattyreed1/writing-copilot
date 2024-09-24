@@ -4,7 +4,7 @@
 
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
-      .addItem('Start Writing Copilot', 'showHomepage')
+      .addItem('Start Writing Copilot', 'showSidebar')  // Change 'showHomepage' to 'showSidebar'
       .addToUi();
 }
 
@@ -31,33 +31,21 @@ function createHomepageCard() {
   card.addSection(selectedTextSection);
   
   var writerSection = CardService.newCardSection()
-    .addWidget(CardService.newSelectionInput()
-      .setTitle("Select Writers")
-      .setFieldName("writers")
-      .setType(CardService.SelectionInputType.DROPDOWN)
-      .setMultiselect(true));
+    .addWidget(CardService.newTextParagraph().setText("Select Writers:"));
 
   var styleSection = CardService.newCardSection()
-    .addWidget(CardService.newSelectionInput()
-      .setTitle("Select Styles")
-      .setFieldName("styles")
-      .setType(CardService.SelectionInputType.DROPDOWN)
-      .setMultiselect(true));
+    .addWidget(CardService.newTextParagraph().setText("Select Styles:"));
 
   // Populate writers and styles
   var aiService = new AIService();
   var writers = aiService.getWriterStyles();
   var styles = aiService.getWritingStyles();
 
-  writers.forEach(function(writer) {
-    writerSection.addWidget(CardService.newSelectionInput()
-      .addItem(writer, writer, false));
-  });
+  // Create a dropdown-like interface for writers
+  writerSection.addWidget(createMultiSelectDropdown("writers", writers));
 
-  styles.forEach(function(style) {
-    styleSection.addWidget(CardService.newSelectionInput()
-      .addItem(style, style, false));
-  });
+  // Create a dropdown-like interface for styles
+  styleSection.addWidget(createMultiSelectDropdown("styles", styles));
 
   var actionSection = CardService.newCardSection()
     .addWidget(CardService.newButtonSet()
@@ -84,6 +72,56 @@ function createHomepageCard() {
   card.setFixedFooter(fixedFooter);
 
   return card.build();
+}
+
+function createMultiSelectDropdown(name, options) {
+  var switchControl = CardService.newSelectionInput()
+    .setType(CardService.SelectionInputType.CHECK_BOX)
+    .setFieldName(name + "_switch")
+    .addItem("Show " + name, "show", false);
+  
+  var checkboxGroup = CardService.newSelectionInput()
+    .setType(CardService.SelectionInputType.CHECK_BOX)
+    .setFieldName(name);
+  
+  options.forEach(function(option) {
+    checkboxGroup.addItem(option, option, false);
+  });
+  
+  var section = CardService.newCardSection()
+    .addWidget(switchControl)
+    .addWidget(checkboxGroup);
+  
+  return CardService.newDecoratedText()
+    .setText(name.charAt(0).toUpperCase() + name.slice(1))
+    .setWrapText(true)
+    .setBottomLabel("Select multiple options")
+    .setSwitchControl(switchControl)
+    .setOnChangeAction(CardService.newAction().setFunctionName("onMultiSelectChange"));
+}
+
+function onMultiSelectChange(e) {
+  var name = e.commonEventObject.formInputs.name;
+  var isChecked = e.commonEventObject.formInputs[name + "_switch"][0] === "show";
+  
+  var card = createHomepageCard();
+  var section = card.getSections().find(function(section) {
+    return section.getWidgets().some(function(widget) {
+      return widget.getFieldName() === name;
+    });
+  });
+  
+  if (section) {
+    section.getWidgets().forEach(function(widget) {
+      if (widget.getFieldName() === name) {
+        widget.setVisible(isChecked);
+      }
+    });
+  }
+  
+  return CardService.newActionResponseBuilder()
+    .setNavigation(CardService.newNavigation().updateCard(card))
+    .build();
 }
 
 function getSelectedText() {
