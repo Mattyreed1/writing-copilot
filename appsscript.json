@@ -1,11 +1,29 @@
 {
-  "timeZone": "America/Los_Angeles",
+  "timeZone": "America/New_York",
   "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
+  "addOns": {
+    "common": {
+      "name": "Writing Copilot",
+      "logoUrl": "https://example.com/logo.png",
+      "useLocaleFromApp": true,
+      "homepageTrigger": {
+        "runFunction": "showHomepage"
+      },
+      "universalActions": [{
+        "label": "Open Writing Copilot",
+        "runFunction": "showHomepage"
+      }],
+      "openLinkUrlPrefixes": [
+        "https://www.google.com/"
+      ]
+    },
+    "docs": {
+    }
+  },
   "oauthScopes": [
-    "https://www.googleapis.com/auth/documents",
-    "https://www.googleapis.com/auth/script.external_request",
-    "https://www.googleapis.com/auth/script.container.ui"
+    "https://www.googleapis.com/auth/documents.currentonly",
+    "https://www.googleapis.com/auth/script.external_request"
   ]
 }
