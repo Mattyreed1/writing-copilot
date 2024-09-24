@@ -4,7 +4,7 @@
 
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
-      .addItem('Start Writing Copilot', 'showSidebar')  // Change 'showHomepage' to 'showSidebar'
+      .addItem('Start Writing Copilot', 'showHomepage')  // Changed 'showSidebar' to 'showHomepage'
       .addToUi();
 }
 
