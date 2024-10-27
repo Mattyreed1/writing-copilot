@@ -14,8 +14,9 @@ function onInstall(e) {
 
 function showHomepage() {
   var card = createHomepageCard();
-  var ui = CardService.newUi().setCard(card);
-  DocumentApp.getUi().showSidebar(ui);
+  var ui = DocumentApp.getUi();
+  CardService.createAddonCard(card);
+  ui.showSidebar(HtmlService.createHtmlOutputFromFile('ui/Sidebar'));
   createSelectionChangeTrigger();
 }
 
