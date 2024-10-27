@@ -9,10 +9,10 @@
   <body>
     <div id="sidebar-content">
       <h3 class="section-title">Set Writing Style</h3>
-      <select id="writer-select" multiple>
+      <select id="writer-select" class="select2-multi" multiple="multiple">
         <option value="" disabled>Select writers...</option>
       </select>
-      <select id="style-select" multiple>
+      <select id="style-select" class="select2-multi" multiple="multiple">
         <option value="" disabled>Select styles...</option>
       </select>
 
@@ -37,19 +37,24 @@
 
     <script>
       $(document).ready(function() {
-        $('#writer-select').select2();
-        $('#style-select').select2();
+        $('.select2-multi').select2({
+          width: '100%',
+          placeholder: 'Select options...',
+          allowClear: true
+        });
 
         google.script.run.withSuccessHandler(function(writers) {
           writers.forEach(function(writer) {
-            $('#writer-select').append(new Option(writer, writer));
+            $('#writer-select').append(new Option(writer, writer, false, false));
           });
+          $('#writer-select').trigger('change');
         }).getWriterStyles();
 
         google.script.run.withSuccessHandler(function(styles) {
           styles.forEach(function(style) {
-            $('#style-select').append(new Option(style, style));
+            $('#style-select').append(new Option(style, style, false, false));
           });
+          $('#style-select').trigger('change');
         }).getWritingStyles();
 
         updateSelectedText();
