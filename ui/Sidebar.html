@@ -2,9 +2,10 @@
 <html>
   <head>
     <base target="_top">
-    <?!= include('ui/CSS') ?>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+    <?!= include('ui/CSS') ?>
   </head>
   <body>
     <div id="sidebar-content">
@@ -33,26 +34,30 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
-
     <script>
       $(document).ready(function() {
+        // Initialize Select2
         $('.select2-multi').select2({
           width: '100%',
           placeholder: 'Select options...',
-          allowClear: true
+          allowClear: true,
+          theme: 'default'
         });
 
+        // Load writers
         google.script.run.withSuccessHandler(function(writers) {
           writers.forEach(function(writer) {
-            $('#writer-select').append(new Option(writer, writer, false, false));
+            var option = new Option(writer, writer, false, false);
+            $('#writer-select').append(option);
           });
           $('#writer-select').trigger('change');
         }).getWriterStyles();
 
+        // Load styles
         google.script.run.withSuccessHandler(function(styles) {
           styles.forEach(function(style) {
-            $('#style-select').append(new Option(style, style, false, false));
+            var option = new Option(style, style, false, false);
+            $('#style-select').append(option);
           });
           $('#style-select').trigger('change');
         }).getWritingStyles();
