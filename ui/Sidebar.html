@@ -10,12 +10,8 @@
   <body>
     <div id="sidebar-content">
       <h3 class="section-title">Set Writing Style</h3>
-      <select id="writer-select" class="select2-multi" multiple="multiple">
-        <option value="" disabled>Select writers...</option>
-      </select>
-      <select id="style-select" class="select2-multi" multiple="multiple">
-        <option value="" disabled>Select styles...</option>
-      </select>
+      <select id="writer-select" class="select2-container" multiple="multiple"></select>
+      <select id="style-select" class="select2-container" multiple="multiple"></select>
 
       <h3 class="section-title">Generate Suggestions</h3>
       <button class="action-button" id="edit-button">EDIT</button>
@@ -36,49 +32,43 @@
 
     <script>
       $(document).ready(function() {
-        // Initialize Select2 with debugging
-        try {
-          $('.select2-multi').select2({
-            width: '100%',
-            placeholder: 'Select options...',
-            allowClear: true,
-            debug: true
-          });
+        // Load writers
+        google.script.run
+          .withSuccessHandler(function(writers) {
+            if (writers && writers.length) {
+              writers.forEach(function(writer) {
+                $('#writer-select').append(new Option(writer, writer, false, false));
+              });
+              $('#writer-select').select2({
+                width: '100%',
+                placeholder: 'Select writers...',
+                allowClear: true
+              });
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error('Error loading writers:', error);
+          })
+          .getWriterStyles();
 
-          // Load writers with error handling
-          google.script.run
-            .withSuccessHandler(function(writers) {
-              console.log('Writers received:', writers);
-              if (writers && writers.length) {
-                writers.forEach(function(writer) {
-                  $('#writer-select').append(new Option(writer, writer));
-                });
-                $('#writer-select').trigger('change');
-              }
-            })
-            .withFailureHandler(function(error) {
-              console.error('Error loading writers:', error);
-            })
-            .getWriterStyles();
-
-          // Load styles with error handling
-          google.script.run
-            .withSuccessHandler(function(styles) {
-              console.log('Styles received:', styles);
-              if (styles && styles.length) {
-                styles.forEach(function(style) {
-                  $('#style-select').append(new Option(style, style));
-                });
-                $('#style-select').trigger('change');
-              }
-            })
-            .withFailureHandler(function(error) {
-              console.error('Error loading styles:', error);
-            })
-            .getWritingStyles();
-        } catch (e) {
-          console.error('Select2 initialization error:', e);
-        }
+        // Load styles
+        google.script.run
+          .withSuccessHandler(function(styles) {
+            if (styles && styles.length) {
+              styles.forEach(function(style) {
+                $('#style-select').append(new Option(style, style, false, false));
+              });
+              $('#style-select').select2({
+                width: '100%',
+                placeholder: 'Select styles...',
+                allowClear: true
+              });
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error('Error loading styles:', error);
+          })
+          .getWritingStyles();
 
         // Add change handlers for debugging
         $('#writer-select').on('change', function() {
