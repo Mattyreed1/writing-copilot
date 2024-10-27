@@ -21,31 +21,25 @@ function showHomepage() {
 
 function createHomepageCard() {
   var card = CardService.newCardBuilder();
-  
+
   card.setHeader(CardService.newCardHeader().setTitle("Writing Copilot"));
-  
+
   var selectedTextSection = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText("Selected Text:"))
-    .addWidget(CardService.newTextParagraph().setText("No text selected"));
-  
+    .addWidget(CardService.newTextInput()
+      .setFieldName("selectedText")
+      .setTitle("Input Text")
+      .setMultiline(true)
+      .setValue(getSelectedText()));
+
   card.addSection(selectedTextSection);
-  
+
   var writerSection = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText("Select Writers:"));
+    .setHeader("Select Writers")
+    .addWidget(createMultiSelectDropdown("writers", getWriterStyles()));
 
   var styleSection = CardService.newCardSection()
-    .addWidget(CardService.newTextParagraph().setText("Select Styles:"));
-
-  // Populate writers and styles
-  var aiService = new AIService();
-  var writers = aiService.getWriterStyles();
-  var styles = aiService.getWritingStyles();
-
-  // Create a dropdown-like interface for writers
-  writerSection.addWidget(createMultiSelectDropdown("writers", writers));
-
-  // Create a dropdown-like interface for styles
-  styleSection.addWidget(createMultiSelectDropdown("styles", styles));
+    .setHeader("Select Styles")
+    .addWidget(createMultiSelectDropdown("styles", getWritingStyles()));
 
   var actionSection = CardService.newCardSection()
     .addWidget(CardService.newButtonSet()
@@ -63,87 +57,40 @@ function createHomepageCard() {
      .addSection(styleSection)
      .addSection(actionSection);
 
-  // Add a fixed footer
-  var fixedFooter = CardService.newFixedFooter()
-    .setPrimaryButton(CardService.newTextButton()
-      .setText("Refresh")
-      .setOnClickAction(CardService.newAction().setFunctionName("refreshHomepage")));
-  
-  card.setFixedFooter(fixedFooter);
-
   return card.build();
 }
 
 function createMultiSelectDropdown(name, options) {
-  var switchControl = CardService.newSelectionInput()
-    .setType(CardService.SelectionInputType.CHECK_BOX)
-    .setFieldName(name + "_switch")
-    .addItem("Show " + name, "show", false);
-  
   var checkboxGroup = CardService.newSelectionInput()
     .setType(CardService.SelectionInputType.CHECK_BOX)
+    .setTitle(name.charAt(0).toUpperCase() + name.slice(1))
     .setFieldName(name);
   
   options.forEach(function(option) {
     checkboxGroup.addItem(option, option, false);
   });
   
-  var section = CardService.newCardSection()
-    .addWidget(switchControl)
-    .addWidget(checkboxGroup);
-  
-  return CardService.newDecoratedText()
-    .setText(name.charAt(0).toUpperCase() + name.slice(1))
-    .setWrapText(true)
-    .setBottomLabel("Select multiple options")
-    .setSwitchControl(switchControl)
-    .setOnChangeAction(CardService.newAction().setFunctionName("onMultiSelectChange"));
-}
-
-function onMultiSelectChange(e) {
-  var name = e.commonEventObject.formInputs.name;
-  var isChecked = e.commonEventObject.formInputs[name + "_switch"][0] === "show";
-  
-  var card = createHomepageCard();
-  var section = card.getSections().find(function(section) {
-    return section.getWidgets().some(function(widget) {
-      return widget.getFieldName() === name;
-    });
-  });
-  
-  if (section) {
-    section.getWidgets().forEach(function(widget) {
-      if (widget.getFieldName() === name) {
-        widget.setVisible(isChecked);
-      }
-    });
-  }
-  
-  return CardService.newActionResponseBuilder()
-    .setNavigation(CardService.newNavigation().updateCard(card))
-    .build();
-}
-
-function getSelectedText() {
-  var selection = DocumentApp.getActiveDocument().getSelection();
-  if (selection) {
-    var text = selection.getRangeElements().map(function(element) {
-      if (element.getElement().editAsText) {
-        return element.getElement().editAsText().getText();
-      }
-      return '';
-    }).join('\n').trim();
-    Logger.log('Selected text: ' + text);
-    return text || 'No text selected';
-  }
-  Logger.log('No text selected');
-  return 'No text selected';
+  return checkboxGroup;
 }
 
 function onEditButtonClicked(e) {
-  var selectedText = getSelectedText();
-  var writers = e.commonEventObject.formInputs.writers || [];
-  var styles = e.commonEventObject.formInputs.styles || [];
+  var selectedText = e.commonEventObject.formInputs.selectedText
+    ? e.commonEventObject.formInputs.selectedText.stringInputs.selectedText[0]
+    : '';
+
+  if (!selectedText) {
+    return CardService.newActionResponseBuilder()
+      .setNotification(CardService.newNotification().setText("Please enter or select text to proceed."))
+      .build();
+  }
+
+  var writers = e.commonEventObject.formInputs.writers
+    ? e.commonEventObject.formInputs.writers.stringInputs.writers
+    : [];
+  var styles = e.commonEventObject.formInputs.styles
+    ? e.commonEventObject.formInputs.styles.stringInputs.styles
+    : [];
+
   var card = generateEdit(selectedText, writers, styles);
   
   return CardService.newActionResponseBuilder()
@@ -152,8 +99,7 @@ function onEditButtonClicked(e) {
 }
 
 function generateEdit(text, selectedWriters, selectedStyles) {
-  var aiService = new AIService();
-  var result = aiService.getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
+  var result = AIService.getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
   return createEditCard(result, text);
 }
 
@@ -185,9 +131,23 @@ function createEditCard(editResult, originalText) {
 }
 
 function onRewriteButtonClicked(e) {
-  var selectedText = getSelectedText();
-  var writers = e.commonEventObject.formInputs.writers || [];
-  var styles = e.commonEventObject.formInputs.styles || [];
+  var selectedText = e.commonEventObject.formInputs.selectedText
+    ? e.commonEventObject.formInputs.selectedText.stringInputs.selectedText[0]
+    : '';
+
+  if (!selectedText) {
+    return CardService.newActionResponseBuilder()
+      .setNotification(CardService.newNotification().setText("Please enter or select text to proceed."))
+      .build();
+  }
+
+  var writers = e.commonEventObject.formInputs.writers
+    ? e.commonEventObject.formInputs.writers.stringInputs.writers
+    : [];
+  var styles = e.commonEventObject.formInputs.styles
+    ? e.commonEventObject.formInputs.styles.stringInputs.styles
+    : [];
+
   var card = generateRewrite(selectedText, writers, styles);
   
   return CardService.newActionResponseBuilder()
@@ -196,9 +156,23 @@ function onRewriteButtonClicked(e) {
 }
 
 function onContinueButtonClicked(e) {
-  var selectedText = getSelectedText();
-  var writers = e.commonEventObject.formInputs.writers || [];
-  var styles = e.commonEventObject.formInputs.styles || [];
+  var selectedText = e.commonEventObject.formInputs.selectedText
+    ? e.commonEventObject.formInputs.selectedText.stringInputs.selectedText[0]
+    : '';
+
+  if (!selectedText) {
+    return CardService.newActionResponseBuilder()
+      .setNotification(CardService.newNotification().setText("Please enter or select text to proceed."))
+      .build();
+  }
+
+  var writers = e.commonEventObject.formInputs.writers
+    ? e.commonEventObject.formInputs.writers.stringInputs.writers
+    : [];
+  var styles = e.commonEventObject.formInputs.styles
+    ? e.commonEventObject.formInputs.styles.stringInputs.styles
+    : [];
+
   var card = generateContinuation(selectedText, writers, styles);
   
   return CardService.newActionResponseBuilder()
@@ -207,8 +181,7 @@ function onContinueButtonClicked(e) {
 }
 
 function generateRewrite(text, writers, styles) {
-  var aiService = new AIService();
-  var results = aiService.getAISuggestions(text, writers, styles, 'rewrite');
+  var results = AIService.getAISuggestions(text, writers, styles, 'rewrite');
   return createRewriteCard("Suggested Rewrites", results, text);
 }
 
@@ -265,8 +238,7 @@ function applyRewrite(e) {
 }
 
 function generateContinuation(text, writers, styles) {
-  var aiService = new AIService();
-  var result = aiService.getAISuggestions(text, writers, styles, 'continue');
+  var result = AIService.getAISuggestions(text, writers, styles, 'continue');
   return createResultCard("Continuation Suggestion", result);
 }
 
@@ -369,5 +341,28 @@ function onClose() {
     if (triggers[i].getHandlerFunction() === 'onSelectionChange') {
       ScriptApp.deleteTrigger(triggers[i]);
     }
+  }
+}
+
+function getSelectedText() {
+  try {
+    var selection = DocumentApp.getActiveDocument().getSelection();
+    if (selection) {
+      var text = '';
+      var elements = selection.getRangeElements();
+      for (var i = 0; i < elements.length; i++) {
+        var element = elements[i];
+        if (element.getElement().editAsText) {
+          var elementText = element.getElement().editAsText().getText();
+          text += elementText + '\n';
+        }
+      }
+      return text.trim();
+    } else {
+      return '';
+    }
+  } catch (e) {
+    Logger.log('Error retrieving selected text: ' + e);
+    return '';
   }
 }
