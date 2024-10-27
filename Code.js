@@ -13,9 +13,10 @@ function onInstall(e) {
 }
 
 function showSidebar() {
-  var ui = HtmlService.createHtmlOutputFromFile('ui/Sidebar')
+  var template = HtmlService.createTemplateFromFile('ui/Sidebar')
+    .evaluate()
     .setTitle('Writing Copilot');
-  DocumentApp.getUi().showSidebar(ui);
+  DocumentApp.getUi().showSidebar(template);
 }
 
 function getSelectedText() {
@@ -90,4 +91,8 @@ function applySuggestion(originalText, newText) {
   } else {
     return 'Original text not found in the document.';
   }
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
