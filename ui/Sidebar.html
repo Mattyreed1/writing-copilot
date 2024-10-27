@@ -36,31 +36,58 @@
 
     <script>
       $(document).ready(function() {
-        // Initialize Select2
-        $('.select2-multi').select2({
-          width: '100%',
-          placeholder: 'Select options...',
-          allowClear: true,
-          theme: 'default'
+        // Initialize Select2 with debugging
+        try {
+          $('.select2-multi').select2({
+            width: '100%',
+            placeholder: 'Select options...',
+            allowClear: true,
+            debug: true
+          });
+
+          // Load writers with error handling
+          google.script.run
+            .withSuccessHandler(function(writers) {
+              console.log('Writers received:', writers);
+              if (writers && writers.length) {
+                writers.forEach(function(writer) {
+                  $('#writer-select').append(new Option(writer, writer));
+                });
+                $('#writer-select').trigger('change');
+              }
+            })
+            .withFailureHandler(function(error) {
+              console.error('Error loading writers:', error);
+            })
+            .getWriterStyles();
+
+          // Load styles with error handling
+          google.script.run
+            .withSuccessHandler(function(styles) {
+              console.log('Styles received:', styles);
+              if (styles && styles.length) {
+                styles.forEach(function(style) {
+                  $('#style-select').append(new Option(style, style));
+                });
+                $('#style-select').trigger('change');
+              }
+            })
+            .withFailureHandler(function(error) {
+              console.error('Error loading styles:', error);
+            })
+            .getWritingStyles();
+        } catch (e) {
+          console.error('Select2 initialization error:', e);
+        }
+
+        // Add change handlers for debugging
+        $('#writer-select').on('change', function() {
+          console.log('Selected writers:', $(this).val());
         });
 
-        // Load writers
-        google.script.run.withSuccessHandler(function(writers) {
-          writers.forEach(function(writer) {
-            var option = new Option(writer, writer, false, false);
-            $('#writer-select').append(option);
-          });
-          $('#writer-select').trigger('change');
-        }).getWriterStyles();
-
-        // Load styles
-        google.script.run.withSuccessHandler(function(styles) {
-          styles.forEach(function(style) {
-            var option = new Option(style, style, false, false);
-            $('#style-select').append(option);
-          });
-          $('#style-select').trigger('change');
-        }).getWritingStyles();
+        $('#style-select').on('change', function() {
+          console.log('Selected styles:', $(this).val());
+        });
 
         updateSelectedText();
 
