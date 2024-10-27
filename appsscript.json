@@ -3,25 +3,6 @@
   "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
-  "addOns": {
-    "common": {
-      "name": "Writing Copilot",
-      "logoUrl": "https://example.com/logo.png",
-      "useLocaleFromApp": true,
-      "homepageTrigger": {
-        "runFunction": "showHomepage"
-      },
-      "universalActions": [{
-        "label": "Open Writing Copilot",
-        "runFunction": "showHomepage"
-      }],
-      "openLinkUrlPrefixes": [
-        "https://www.google.com/"
-      ]
-    },
-    "docs": {
-    }
-  },
   "oauthScopes": [
     "https://www.googleapis.com/auth/documents.currentonly",
     "https://www.googleapis.com/auth/script.external_request"

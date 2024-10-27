@@ -2,29 +2,33 @@ var AIService = {
   OVERALL_PROMPT: "You are a writing editor with 30 years of experience writing and editing written content. You write intriguing introductions that hook readers by providing clear value and peaking their interest. You use engaging language to spark curiosity, ensuring that the writing draws readers in from the start. Throughout the text, you maintain a focus on clarity and brevity, trimming excess words and sharpening arguments. Your writing is clear and approachable such that even an 8th grader can understand you.",
 
   getAISuggestions: function(text, writers, styles, operation) {
-    var writersString = Array.isArray(writers) ? writers.join(', ') : writers;
-    var stylesString = Array.isArray(styles) ? styles.join(', ') : styles;
+    var OVERALL_PROMPT = "You are a writing editor with 30 years of experience writing and editing content.";
+    var writersString = Array.isArray(writers) && writers.length > 0 ? writers.join(', ') : 'a professional writer';
+    var stylesString = Array.isArray(styles) && styles.length > 0 ? styles.join(', ') : 'clear and concise';
     
     var prompt = '';
-    switch(operation) {
+    switch (operation) {
       case 'edit':
-        prompt = `Suggest specific edits for the following text in the style of ${writersString}, using ${stylesString} writing styles. Provide the edits and a brief explanation of why you suggest the changes:\n\n${text}`;
+        prompt = `Edit the following text in the style of ${writersString}, using ${stylesString} writing styles:\n\n${text}`;
         break;
       case 'rewrite':
-        prompt = `Rewrite the following text in the style of ${writersString}, maintaining ${stylesString} writing styles. Provide 3 different versions:\n\n${text}`;
+        prompt = `Rewrite the following text in the style of ${writersString}, maintaining ${stylesString} writing styles. Provide exactly 3 different versions, each separated by "---":\n\n${text}`;
         break;
       case 'continue':
-        prompt = `Continue the following text in the style of ${writersString}, maintaining ${stylesString} writing styles. Add approximately 100 words:\n\n${text}`;
+        prompt = `Continue the following text in the style of ${writersString}, maintaining ${stylesString} writing styles:\n\n${text}`;
         break;
       default:
-        return `Error: Invalid operation '${operation}'. Please use 'edit', 'rewrite', or 'continue'.`;
+        throw new Error('Invalid operation.');
     }
-  
-    try {
-      return this.callOpenAI(prompt);
-    } catch (error) {
-      Logger.log('Error in getAISuggestions: ' + error);
-      return 'An error occurred while processing your request. Please try again.';
+
+    var response = callOpenAI(prompt);
+    
+    if (operation === 'rewrite') {
+      return response.split('---').map(function(item) {
+        return item.trim();
+      });
+    } else {
+      return response;
     }
   },
 
@@ -34,7 +38,7 @@ var AIService = {
     var payload = {
       'model': model,
       'messages': [
-        {'role': 'system', 'content': this.OVERALL_PROMPT},
+        {'role': 'system', 'content': 'You are a helpful assistant.'},
         {'role': 'user', 'content': prompt}
       ],
       'max_tokens': maxTokens
@@ -53,19 +57,12 @@ var AIService = {
     
     try {
       var response = UrlFetchApp.fetch(url, options);
-      var statusCode = response.getResponseCode();
-      var json = response.getContentText();
-      
-      if (statusCode !== 200) {
-        throw new Error(`HTTP ${statusCode}: ${json}`);
-      }
-      
-      var data = JSON.parse(json);
+      var data = JSON.parse(response.getContentText());
       if (!data.choices || data.choices.length === 0) {
-        throw new Error('No choices returned from OpenAI');
+        throw new Error('No response from OpenAI.');
       }
       return data.choices[0].message.content.trim();
-    } catch(error) {
+    } catch (error) {
       Logger.log('Error calling OpenAI API: ' + error);
       throw new Error('Failed to get a response from OpenAI. Please try again.');
     }

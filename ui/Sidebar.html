@@ -4,49 +4,42 @@
     <base target="_top">
     <?!= include('ui/CSS'); ?>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
   </head>
   <body>
     <div id="sidebar-content">
-
       <div class="section">
         <h2>Set Writing Style</h2>
         <select id="writer-select" multiple>
-          <p>Select writers...</p>
+          <option value="" disabled>Select writers...</option>
         </select>
         <select id="style-select" multiple>
-          <option value="" disabled selected>Select styles...</option>
+          <option value="" disabled>Select styles...</option>
         </select>
+      </div>
+
+      <div class="section">
+        <h2>Highlighted Text</h2>
+        <p id="selected-text" class="highlighted-text">No text selected</p>
       </div>
 
       <div class="section">
         <h2>Generate Suggestions</h2>
         <div class="button-container">
-          <button id="edit-button" class="action">EDIT</button>
-          <button class="action" data-action="rewrite">REWRITE</button>
-          <button class="action" data-action="continue">CONTINUE</button>
+          <button id="edit-button">Edit</button>
+          <button id="rewrite-button">Rewrite</button>
+          <button id="continue-button">Continue</button>
         </div>
       </div>
 
-      <div class="section">
-        <h2>Find Quotes & Resources</h2>
-        <div class="button-container">
-          <button id="find-quotes">FIND QUOTES</button>
-          <button id="find-resources">FIND RESOURCES</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>Highlighted text</h2>
-        <p id="selected-text" class="highlighted-text"></p>
-      </div>
-
-      <div id="error-message" style="display:none;">
-        <div class="error">An error occurred. Please try again.</div>
+      <div id="results-container" style="display:none;">
+        <h2>Results</h2>
+        <div id="results-content"></div>
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
     <script>
       $(document).ready(function() {
         $('#writer-select').select2();
@@ -64,156 +57,87 @@
           });
         }).getWritingStyles();
 
-        // Create the selection change trigger when the sidebar loads
-        google.script.run.createSelectionChangeTrigger();
+        updateSelectedText();
 
-        // Debounce function to limit how often a function is called
-        function debounce(func, wait) {
-          let timeout;
-          return function executedFunction(...args) {
-            const later = () => {
-              clearTimeout(timeout);
-              func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-          };
-        }
+        $('#edit-button').click(function() {
+          processAction('edit');
+        });
 
-        // Update the selected text in the sidebar
-        const updateSelectedText = debounce(function(text) {
-          $('#selected-text').text(text || 'No text selected');
-        }, 300);  // 300ms debounce time
+        $('#rewrite-button').click(function() {
+          processAction('rewrite');
+        });
 
-        // Add event listener for the Edit button
-        document.getElementById('edit-button').addEventListener('click', handleEditAction);
+        $('#continue-button').click(function() {
+          processAction('continue');
+        });
+
+        // Periodically update selected text
+        setInterval(updateSelectedText, 1000);
       });
 
-      function handleEditAction() {
-        var text = document.getElementById('selected-text').textContent;
+      function updateSelectedText() {
+        google.script.run.withSuccessHandler(function(text) {
+          $('#selected-text').text(text || 'No text selected');
+        }).getSelectedText();
+      }
+
+      function processAction(action) {
+        var text = $('#selected-text').text();
         if (!text || text === 'No text selected') {
-          showError('Please select some text to edit.');
+          alert('Please select some text in the document.');
           return;
         }
 
-        var selectedWriters = $('#writer-select').val();
-        var selectedStyles = $('#style-select').val();
+        var selectedWriters = $('#writer-select').val() || [];
+        var selectedStyles = $('#style-select').val() || [];
 
-        showLoading(true);
+        $('#results-container').hide();
+        $('#results-content').empty();
 
-        google.script.run
-          .withSuccessHandler(function(response) {
-            showLoading(false);
-            console.log('Edit card created successfully');
-          })
-          .withFailureHandler(function(error) {
-            showLoading(false);
-            showError(error.message || 'An error occurred while editing the text.');
-          })
-          .onEditButtonClicked(text, selectedWriters, selectedStyles);
+        google.script.run.withSuccessHandler(function(result) {
+          displayResults(action, result, text);
+        }).withFailureHandler(function(error) {
+          alert('Error: ' + error.message);
+        })['generate' + capitalizeFirstLetter(action)](text, selectedWriters, selectedStyles);
       }
 
-      function displayEditResults(result) {
-        // Create a new div to display the results
-        var resultsDiv = document.createElement('div');
-        resultsDiv.innerHTML = result;
-        
-        // Clear previous results and add new ones
-        var contentDiv = document.getElementById('sidebar-content');
-        var existingResults = contentDiv.querySelector('.edit-results');
-        if (existingResults) {
-          contentDiv.removeChild(existingResults);
+      function displayResults(action, result, originalText) {
+        $('#results-container').show();
+        $('#results-content').empty();
+
+        if (Array.isArray(result)) {
+          result.forEach(function(item, index) {
+            var suggestionDiv = $('<div>').addClass('suggestion');
+            var radio = $('<input type="radio" name="suggestion">').val(item);
+            if (index === 0) radio.attr('checked', true);
+            suggestionDiv.append(radio).append($('<span>').text(item));
+            $('#results-content').append(suggestionDiv);
+          });
+          var applyButton = $('<button>').text('Apply Suggestion').click(function() {
+            var selectedText = $('input[name="suggestion"]:checked').val();
+            applySuggestion(originalText, selectedText);
+          });
+          $('#results-content').append(applyButton);
+        } else {
+          var resultDiv = $('<div>').addClass('result').text(result);
+          var applyButton = $('<button>').text('Apply Suggestion').click(function() {
+            applySuggestion(originalText, result);
+          });
+          $('#results-content').append(resultDiv).append(applyButton);
         }
-        resultsDiv.className = 'edit-results';
-        contentDiv.appendChild(resultsDiv);
       }
 
-      function showMessage(message) {
-        var messageElement = document.getElementById('message');
-        if (!messageElement) {
-          messageElement = document.createElement('div');
-          messageElement.id = 'message';
-          document.body.appendChild(messageElement);
-        }
-        messageElement.textContent = message;
-        messageElement.style.display = 'block';
-        setTimeout(function() {
-          messageElement.style.display = 'none';
-        }, 3000);
+      function applySuggestion(originalText, newText) {
+        google.script.run.withSuccessHandler(function(message) {
+          alert(message);
+        }).withFailureHandler(function(error) {
+          alert('Error: ' + error.message);
+        }).applySuggestion(originalText, newText);
       }
 
-      function showLoading(isLoading) {
-        var loadingElement = document.getElementById('loading');
-        if (!loadingElement) {
-          loadingElement = document.createElement('div');
-          loadingElement.id = 'loading';
-          loadingElement.innerHTML = 'Loading...';
-          loadingElement.style.display = 'none';
-          document.body.appendChild(loadingElement);
-        }
-        loadingElement.style.display = isLoading ? 'block' : 'none';
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
       }
-
-      function onSidebarLoad() {
-        google.script.run.withSuccessHandler(updateSelectedText).getSelectedText();
-        google.script.run.listenForSelectionChanges();
-      }
-
-      function runAction(action) {
-        var text = document.getElementById('selected-text').value;
-        google.script.run.withSuccessHandler(updateResults)
-          .withFailureHandler(showError)
-          [action](text);
-      }
-
-      function updateResults(result) {
-        document.getElementById('results-container').innerHTML = result;
-      }
-
-      function updateSelectedText(text) {
-        var selectedTextElement = document.getElementById('selected-text');
-        selectedTextElement.textContent = text || 'No text selected';
-      }
-
-      function showError(error) {
-        document.getElementById('error-message').style.display = 'block';
-        document.getElementById('error-message').innerText = error.message;
-      }
-
-      function listenForSelectionChanges() {
-        google.script.run.withSuccessHandler(function() {
-          console.log('Listening for selection changes');
-        }).listenForSelectionChanges();
-      }
-
-      // Initialize the sidebar
-      google.script.run.withSuccessHandler(onSidebarLoad).getSelectedText();
-
-      // Remove trigger when the sidebar is closed
-      window.addEventListener('unload', function() {
-        google.script.run.removeTrigger();
-      });
-
-      // Add event listeners to buttons
-      document.querySelectorAll('.action').forEach(function(button) {
-        button.addEventListener('click', function() {
-          runAction(this.dataset.action);
-        });
-      });
-
-      document.getElementById('find-quotes').addEventListener('click', function() {
-        // Implement find quotes functionality
-      });
-
-      document.getElementById('find-resources').addEventListener('click', function() {
-        // Implement find resources functionality
-      });
-
-      // Update selected text every 500 milliseconds
-      setInterval(updateSelectedText, 500);
-
-      // Initial update
-      updateSelectedText();
     </script>
   </body>
 </html>
