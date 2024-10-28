@@ -160,13 +160,17 @@
             <div class="suggestions-container">
               ${result.suggestions.map((suggestion, index) => `
                 <div class="suggestion-card">
-                  <div class="suggestion-text">${suggestion.text}</div>
+                  <div class="original-text">Original: "${suggestion.original}"</div>
+                  <div class="suggestion-text">Suggestion: "${suggestion.suggestion}"</div>
                   <div class="suggestion-explanation">${suggestion.explanation}</div>
-                  <input type="checkbox" class="suggestion-select" data-index="${index}">
+                  <label class="suggestion-select-label">
+                    <input type="checkbox" class="suggestion-select" data-index="${index}">
+                    Apply this edit
+                  </label>
                 </div>
               `).join('')}
             </div>
-            <button id="apply-edits" class="action-button">APPLY EDITS</button>
+            <button id="apply-edits" class="action-button">APPLY SELECTED EDITS</button>
           </div>
         `;
         
@@ -178,14 +182,14 @@
         });
         
         $('#apply-edits').click(() => {
-          const selectedSuggestions = $('.suggestion-select:checked').map(function() {
-            return result.suggestions[$(this).data('index')].text;
+          const selectedEdits = $('.suggestion-select:checked').map(function() {
+            return result.suggestions[$(this).data('index')];
           }).get();
           
-          if (selectedSuggestions.length > 0) {
+          if (selectedEdits.length > 0) {
             google.script.run
               .withSuccessHandler(() => location.reload())
-              .applySuggestion(result.originalText, selectedSuggestions[0]);
+              .applySelectedEdits(result.originalText, selectedEdits);
           }
         });
       }

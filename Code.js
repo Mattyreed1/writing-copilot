@@ -106,16 +106,10 @@ function handleEdit(text, selectedWriters, selectedStyles) {
   }
 
   try {
-    // Get AI suggestions
     const aiResponse = getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
-    
-    // Format the response
     return {
       originalText: text,
-      suggestions: [{
-        text: aiResponse,
-        explanation: "This edit improves clarity and maintains the intended message while incorporating the selected writing styles."
-      }]
+      suggestions: aiResponse.edits
     };
   } catch (error) {
     Logger.log('Error in handleEdit: ' + error);
@@ -124,11 +118,15 @@ function handleEdit(text, selectedWriters, selectedStyles) {
 }
 
 function applySelectedEdits(originalText, selectedEdits) {
-  if (!selectedEdits || selectedEdits.length === 0) {
-    return { error: 'No edits selected' };
-  }
-
+  let updatedText = originalText;
+  
   try {
+    // Apply each edit in sequence
+    selectedEdits.forEach(edit => {
+      updatedText = updatedText.replace(edit.original, edit.suggestion);
+    });
+    
+    // Update the document with final text
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
     var foundElement = body.editAsText().findText(originalText);
@@ -137,7 +135,7 @@ function applySelectedEdits(originalText, selectedEdits) {
       var start = foundElement.getStartOffset();
       var end = foundElement.getEndOffsetInclusive();
       foundElement.getElement().editAsText().deleteText(start, end);
-      foundElement.getElement().editAsText().insertText(start, selectedEdits[0]);
+      foundElement.getElement().editAsText().insertText(start, updatedText);
       return { success: true, message: 'Edits applied successfully' };
     } else {
       return { error: 'Original text not found in document' };

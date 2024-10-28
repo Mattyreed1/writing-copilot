@@ -2,6 +2,9 @@ var AIService = {
   OVERALL_PROMPT: "You are a writing editor with 30 years of experience writing and editing written content. You write intriguing introductions that hook readers by providing clear value and peaking their interest. You use engaging language to spark curiosity, ensuring that the writing draws readers in from the start. Throughout the text, you maintain a focus on clarity and brevity, trimming excess words and sharpening arguments. Your writing is clear and approachable such that even an 8th grader can understand you.",
 
   getAISuggestions: function(text, writers, styles, operation) {
+    if (operation === 'edit') {
+      return this.generateSpecificEdits(text, writers, styles);
+    }
     var OVERALL_PROMPT = "You are a writing editor with 30 years of experience writing and editing content.";
     var writersString = Array.isArray(writers) && writers.length > 0 ? writers.join(', ') : 'a professional writer';
     var stylesString = Array.isArray(styles) && styles.length > 0 ? styles.join(', ') : 'clear and concise';
@@ -29,6 +32,40 @@ var AIService = {
       });
     } else {
       return response;
+    }
+  },
+
+  generateSpecificEdits: function(text, writers, styles) {
+    const prompt = `As a writing assistant, analyze the following text and suggest specific, targeted improvements. 
+    Focus on individual words, phrases, or sentences that could be enhanced.
+    For each suggestion, provide:
+    1. The original text segment
+    2. The suggested improvement
+    3. A brief explanation of why this change improves the writing
+    
+    Writing style preferences: ${styles.join(', ')}
+    Writer influences: ${writers.join(', ')}
+    
+    Text to analyze: "${text}"
+    
+    Format your response as JSON with this structure:
+    {
+      "edits": [
+        {
+          "original": "text segment",
+          "suggestion": "improved version",
+          "explanation": "brief reason for change"
+        }
+      ]
+    }`;
+
+    try {
+      const response = this.callOpenAI(prompt);
+      const parsedResponse = JSON.parse(response);
+      return parsedResponse;
+    } catch (error) {
+      Logger.log('Error generating specific edits: ' + error);
+      throw new Error('Failed to generate edit suggestions');
     }
   },
 
