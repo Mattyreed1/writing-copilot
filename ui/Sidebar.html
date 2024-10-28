@@ -32,134 +32,90 @@
 
     <script>
       $(document).ready(function() {
-        // Load writers
-        google.script.run
-          .withSuccessHandler(function(writers) {
-            if (writers && writers.length) {
-              writers.forEach(function(writer) {
-                $('#writer-select').append(new Option(writer, writer, false, false));
-              });
-              $('#writer-select').select2({
-                width: '100%',
-                placeholder: 'Select writers...',
-                allowClear: true
-              });
-            }
-          })
-          .withFailureHandler(function(error) {
-            console.error('Error loading writers:', error);
-          })
-          .getWriterStyles();
+        setTimeout(function() {
+          try {
+            // Initialize writer select
+            $('#writer-select').select2({
+              dropdownParent: $('#sidebar-content'),
+              width: '100%',
+              placeholder: 'Select writers...',
+              allowClear: true,
+              multiple: true,
+              closeOnSelect: false
+            });
 
-        // Load styles
-        google.script.run
-          .withSuccessHandler(function(styles) {
-            if (styles && styles.length) {
-              styles.forEach(function(style) {
-                $('#style-select').append(new Option(style, style, false, false));
-              });
-              $('#style-select').select2({
-                width: '100%',
-                placeholder: 'Select styles...',
-                allowClear: true
-              });
-            }
-          })
-          .withFailureHandler(function(error) {
-            console.error('Error loading styles:', error);
-          })
-          .getWritingStyles();
+            // Initialize style select
+            $('#style-select').select2({
+              dropdownParent: $('#sidebar-content'),
+              width: '100%',
+              placeholder: 'Select styles...',
+              allowClear: true,
+              multiple: true,
+              closeOnSelect: false
+            });
 
-        // Add change handlers for debugging
-        $('#writer-select').on('change', function() {
-          console.log('Selected writers:', $(this).val());
-        });
-
-        $('#style-select').on('change', function() {
-          console.log('Selected styles:', $(this).val());
-        });
-
-        updateSelectedText();
-
-        $('#edit-button').click(function() {
-          processAction('edit');
-        });
-
-        $('#rewrite-button').click(function() {
-          processAction('rewrite');
-        });
-
-        $('#continue-button').click(function() {
-          processAction('continue');
-        });
-
-        // Periodically update selected text
-        setInterval(updateSelectedText, 1000);
+            // Debug logging
+            console.log('Select2 initialization complete');
+            
+          } catch (error) {
+            console.error('Select2 initialization error:', error);
+          }
+        }, 100); // Small delay to ensure DOM is ready
       });
 
-      function updateSelectedText() {
-        google.script.run.withSuccessHandler(function(text) {
-          $('#selected-text').text(text || 'No text selected');
-        }).getSelectedText();
-      }
+      // Load writers
+      google.script.run
+        .withSuccessHandler(function(writers) {
+          if (writers && writers.length) {
+            writers.forEach(function(writer) {
+              $('#writer-select').append(new Option(writer, writer, false, false));
+            });
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading writers:', error);
+        })
+        .getWriterStyles();
 
-      function processAction(action) {
-        var text = $('#selected-text').text();
-        if (!text || text === 'No text selected') {
-          alert('Please select some text in the document.');
-          return;
-        }
+      // Load styles
+      google.script.run
+        .withSuccessHandler(function(styles) {
+          if (styles && styles.length) {
+            styles.forEach(function(style) {
+              $('#style-select').append(new Option(style, style, false, false));
+            });
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading styles:', error);
+        })
+        .getWritingStyles();
 
-        var selectedWriters = $('#writer-select').val() || [];
-        var selectedStyles = $('#style-select').val() || [];
+      // Add change handlers for debugging
+      $('#writer-select').on('change', function() {
+        console.log('Selected writers:', $(this).val());
+      });
 
-        $('#results-container').hide();
-        $('#results-content').empty();
+      $('#style-select').on('change', function() {
+        console.log('Selected styles:', $(this).val());
+      });
 
-        google.script.run.withSuccessHandler(function(result) {
-          displayResults(action, result, text);
-        }).withFailureHandler(function(error) {
-          alert('Error: ' + error.message);
-        })['generate' + capitalizeFirstLetter(action)](text, selectedWriters, selectedStyles);
-      }
+      updateSelectedText();
 
-      function displayResults(action, result, originalText) {
-        $('#results-container').show();
-        $('#results-content').empty();
+      $('#edit-button').click(function() {
+        processAction('edit');
+      });
 
-        if (Array.isArray(result)) {
-          result.forEach(function(item, index) {
-            var suggestionDiv = $('<div>').addClass('suggestion');
-            var radio = $('<input type="radio" name="suggestion">').val(item);
-            if (index === 0) radio.attr('checked', true);
-            suggestionDiv.append(radio).append($('<span>').text(item));
-            $('#results-content').append(suggestionDiv);
-          });
-          var applyButton = $('<button>').text('Apply Suggestion').click(function() {
-            var selectedText = $('input[name="suggestion"]:checked').val();
-            applySuggestion(originalText, selectedText);
-          });
-          $('#results-content').append(applyButton);
-        } else {
-          var resultDiv = $('<div>').addClass('result').text(result);
-          var applyButton = $('<button>').text('Apply Suggestion').click(function() {
-            applySuggestion(originalText, result);
-          });
-          $('#results-content').append(resultDiv).append(applyButton);
-        }
-      }
+      $('#rewrite-button').click(function() {
+        processAction('rewrite');
+      });
 
-      function applySuggestion(originalText, newText) {
-        google.script.run.withSuccessHandler(function(message) {
-          alert(message);
-        }).withFailureHandler(function(error) {
-          alert('Error: ' + error.message);
-        }).applySuggestion(originalText, newText);
-      }
+      $('#continue-button').click(function() {
+        processAction('continue');
+      });
 
-      function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-      }
+      // Periodically update selected text
+      setInterval(updateSelectedText, 1000);
     </script>
   </body>
 </html>
