@@ -118,21 +118,31 @@
       $('#edit-button').click(function() {
         const selectedWriters = $('#writer-select').val();
         const selectedStyles = $('#style-select').val();
+        const selectedText = $('#selected-text').text();
         
         // Show loading state
         $('#sidebar-content').hide();
         $('#loading').show();
         
         google.script.run
-          .withSuccessHandler(function(suggestions) {
-            showEditSuggestions(suggestions);
+          .withSuccessHandler(function(result) {
+            if (result.error) {
+              // Handle error
+              console.error(result.error);
+              $('#loading').hide();
+              $('#sidebar-content').show();
+              return;
+            }
+            
+            // Show edit suggestions view
+            showEditSuggestions(result);
           })
           .withFailureHandler(function(error) {
-            console.error('Error getting suggestions:', error);
+            console.error('Error:', error);
             $('#loading').hide();
             $('#sidebar-content').show();
           })
-          .generateEdit(getSelectedText(), selectedWriters, selectedStyles);
+          .generateEdit(selectedText, selectedWriters, selectedStyles);
       });
 
       function showEditSuggestions(suggestions) {

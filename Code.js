@@ -64,8 +64,7 @@ function getWritingStyles() {
 }
 
 function generateEdit(text, selectedWriters, selectedStyles) {
-  var result = getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
-  return result;
+  return handleEdit(text, selectedWriters, selectedStyles);
 }
 
 function generateRewrite(text, selectedWriters, selectedStyles) {
@@ -95,4 +94,57 @@ function applySuggestion(originalText, newText) {
 
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+function handleEdit(text, selectedWriters, selectedStyles) {
+  // Validate inputs
+  if (!text) return { error: 'No text selected' };
+  if (!selectedWriters || !selectedStyles) return { error: 'No writers or styles selected' };
+
+  try {
+    // Get AI suggestions
+    const suggestions = getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
+    
+    // Parse and format suggestions
+    const formattedSuggestions = {
+      originalText: text,
+      suggestions: [
+        {
+          text: suggestions,
+          explanation: "Here's why this edit improves the writing..."
+        }
+        // In the future, we can add more suggestions here
+      ]
+    };
+
+    return formattedSuggestions;
+  } catch (error) {
+    Logger.log('Error in handleEdit: ' + error);
+    return { error: 'Failed to generate suggestions' };
+  }
+}
+
+function applySelectedEdits(originalText, selectedEdits) {
+  if (!selectedEdits || selectedEdits.length === 0) {
+    return { error: 'No edits selected' };
+  }
+
+  try {
+    var doc = DocumentApp.getActiveDocument();
+    var body = doc.getBody();
+    var foundElement = body.editAsText().findText(originalText);
+    
+    if (foundElement) {
+      var start = foundElement.getStartOffset();
+      var end = foundElement.getEndOffsetInclusive();
+      foundElement.getElement().editAsText().deleteText(start, end);
+      foundElement.getElement().editAsText().insertText(start, selectedEdits[0]);
+      return { success: true, message: 'Edits applied successfully' };
+    } else {
+      return { error: 'Original text not found in document' };
+    }
+  } catch (error) {
+    Logger.log('Error applying edits: ' + error);
+    return { error: 'Failed to apply edits' };
+  }
 }
