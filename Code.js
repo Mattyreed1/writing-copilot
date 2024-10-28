@@ -97,27 +97,26 @@ function include(filename) {
 }
 
 function handleEdit(text, selectedWriters, selectedStyles) {
-  // Validate inputs
-  if (!text) return { error: 'No text selected' };
-  if (!selectedWriters || !selectedStyles) return { error: 'No writers or styles selected' };
+  if (!text || text === 'No text selected') {
+    return { error: 'No text selected' };
+  }
+  
+  if (!selectedWriters || !selectedStyles) {
+    return { error: 'Please select writing styles' };
+  }
 
   try {
     // Get AI suggestions
-    const suggestions = getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
+    const aiResponse = getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
     
-    // Parse and format suggestions
-    const formattedSuggestions = {
+    // Format the response
+    return {
       originalText: text,
-      suggestions: [
-        {
-          text: suggestions,
-          explanation: "Here's why this edit improves the writing..."
-        }
-        // In the future, we can add more suggestions here
-      ]
+      suggestions: [{
+        text: aiResponse,
+        explanation: "This edit improves clarity and maintains the intended message while incorporating the selected writing styles."
+      }]
     };
-
-    return formattedSuggestions;
   } catch (error) {
     Logger.log('Error in handleEdit: ' + error);
     return { error: 'Failed to generate suggestions' };

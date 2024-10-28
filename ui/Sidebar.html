@@ -41,6 +41,11 @@
       </div>
     </div>
 
+    <div id="loading" style="display:none;">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Generating suggestions...</div>
+    </div>
+
     <script>
       $(function() {
         // Initialize writer select
@@ -145,7 +150,7 @@
           .generateEdit(selectedText, selectedWriters, selectedStyles);
       });
 
-      function showEditSuggestions(suggestions) {
+      function showEditSuggestions(result) {
         const editView = `
           <div id="edit-view">
             <div class="header">
@@ -153,7 +158,7 @@
               <h2>Suggested Edits</h2>
             </div>
             <div class="suggestions-container">
-              ${suggestions.map((suggestion, index) => `
+              ${result.suggestions.map((suggestion, index) => `
                 <div class="suggestion-card">
                   <div class="suggestion-text">${suggestion.text}</div>
                   <div class="suggestion-explanation">${suggestion.explanation}</div>
@@ -165,22 +170,22 @@
           </div>
         `;
         
-        $('#sidebar-content').html(editView);
+        $('#loading').hide();
+        $('#sidebar-content').html(editView).show();
         
-        // Add handlers for back button and apply edits
         $('#back-button').click(() => {
           location.reload();
         });
         
         $('#apply-edits').click(() => {
           const selectedSuggestions = $('.suggestion-select:checked').map(function() {
-            return suggestions[$(this).data('index')];
+            return result.suggestions[$(this).data('index')].text;
           }).get();
           
           if (selectedSuggestions.length > 0) {
             google.script.run
               .withSuccessHandler(() => location.reload())
-              .applySuggestion(originalText, selectedSuggestions[0].text);
+              .applySuggestion(result.originalText, selectedSuggestions[0]);
           }
         });
       }
