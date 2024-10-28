@@ -116,8 +116,64 @@
       updateSelectedText();
 
       $('#edit-button').click(function() {
-        processAction('edit');
+        const selectedWriters = $('#writer-select').val();
+        const selectedStyles = $('#style-select').val();
+        
+        // Show loading state
+        $('#sidebar-content').hide();
+        $('#loading').show();
+        
+        google.script.run
+          .withSuccessHandler(function(suggestions) {
+            showEditSuggestions(suggestions);
+          })
+          .withFailureHandler(function(error) {
+            console.error('Error getting suggestions:', error);
+            $('#loading').hide();
+            $('#sidebar-content').show();
+          })
+          .generateEdit(getSelectedText(), selectedWriters, selectedStyles);
       });
+
+      function showEditSuggestions(suggestions) {
+        const editView = `
+          <div id="edit-view">
+            <div class="header">
+              <button id="back-button">← Back</button>
+              <h2>Suggested Edits</h2>
+            </div>
+            <div class="suggestions-container">
+              ${suggestions.map((suggestion, index) => `
+                <div class="suggestion-card">
+                  <div class="suggestion-text">${suggestion.text}</div>
+                  <div class="suggestion-explanation">${suggestion.explanation}</div>
+                  <input type="checkbox" class="suggestion-select" data-index="${index}">
+                </div>
+              `).join('')}
+            </div>
+            <button id="apply-edits" class="action-button">APPLY EDITS</button>
+          </div>
+        `;
+        
+        $('#sidebar-content').html(editView);
+        
+        // Add handlers for back button and apply edits
+        $('#back-button').click(() => {
+          location.reload();
+        });
+        
+        $('#apply-edits').click(() => {
+          const selectedSuggestions = $('.suggestion-select:checked').map(function() {
+            return suggestions[$(this).data('index')];
+          }).get();
+          
+          if (selectedSuggestions.length > 0) {
+            google.script.run
+              .withSuccessHandler(() => location.reload())
+              .applySuggestion(originalText, selectedSuggestions[0].text);
+          }
+        });
+      }
 
       $('#rewrite-button').click(function() {
         processAction('rewrite');
