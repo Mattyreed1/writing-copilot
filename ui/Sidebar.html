@@ -101,6 +101,18 @@
         console.log('Selected styles:', $(this).val());
       });
 
+      function updateSelectedText() {
+        google.script.run
+          .withSuccessHandler(function(text) {
+            $('#selected-text').text(text || 'No text selected');
+          })
+          .withFailureHandler(function(error) {
+            console.error('Error getting selected text:', error);
+            $('#selected-text').text('Error getting selected text');
+          })
+          .getSelectedText();
+      }
+
       updateSelectedText();
 
       $('#edit-button').click(function() {
