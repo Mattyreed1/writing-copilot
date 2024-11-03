@@ -145,3 +145,12 @@ function applySelectedEdits(originalText, selectedEdits) {
     return { error: 'Failed to apply edits' };
   }
 }
+
+function handleEditWithSelection(selectedWriters, selectedStyles) {
+  const selectedText = getSelectedText();
+  if (!selectedText || selectedText === 'No text selected') {
+    return { error: 'No text selected' };
+  }
+  
+  return handleEdit(selectedText, selectedWriters, selectedStyles);
+}

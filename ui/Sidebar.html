@@ -104,41 +104,33 @@
         // Modify action buttons to stop monitoring when clicked
         $('#edit-button').click(function() {
           stopSelectionMonitoring();
-
+          
           const selectedWriters = $('#writer-select').val();
           const selectedStyles = $('#style-select').val();
 
-          // Get the selected text when the button is clicked
+          // Show loading state immediately
+          $('#sidebar-content').hide();
+          $('#loading').show();
+
+          // Single server call
           google.script.run
-            .withSuccessHandler(function(selectedText) {
-              if (!selectedText || selectedText === 'No text selected') {
-                alert('Please select text in the document.');
+            .withSuccessHandler(function(result) {
+              if (result.error) {
+                alert(result.error);
+                $('#loading').hide();
+                $('#sidebar-content').show();
                 startSelectionMonitoring();
                 return;
               }
-
-              // Show loading state
-              $('#sidebar-content').hide();
-              $('#loading').show();
-
-              google.script.run
-                .withSuccessHandler(function(result) {
-                  // Handle the result
-                  showEditSuggestions(result);
-                })
-                .withFailureHandler(function(error) {
-                  console.error('Error:', error);
-                  $('#loading').hide();
-                  $('#sidebar-content').show();
-                  startSelectionMonitoring();
-                })
-                .generateEdit(selectedText, selectedWriters, selectedStyles);
+              showEditSuggestions(result);
             })
             .withFailureHandler(function(error) {
-              console.error('Error getting selected text:', error);
+              console.error('Error:', error);
+              $('#loading').hide();
+              $('#sidebar-content').show();
               startSelectionMonitoring();
             })
-            .getSelectedText();
+            .handleEditWithSelection(selectedWriters, selectedStyles);
         });
 
         // Similar modifications for other action buttons
