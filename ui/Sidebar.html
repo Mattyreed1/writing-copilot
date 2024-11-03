@@ -47,6 +47,8 @@
     </div>
 
     <script>
+      let selectionInterval;
+
       $(function() {
         // Initialize writer select
         google.script.run
@@ -95,15 +97,70 @@
             console.error('Error loading styles:', error);
           })
           .getWritingStyles();
-      });
 
-      // Add change handlers for debugging
-      $('#writer-select').on('change', function() {
-        console.log('Selected writers:', $(this).val());
-      });
+        // Start monitoring selected text
+        startSelectionMonitoring();
 
-      $('#style-select').on('change', function() {
-        console.log('Selected styles:', $(this).val());
+        // Modify action buttons to stop monitoring when clicked
+        $('#edit-button').click(function() {
+          stopSelectionMonitoring();
+
+          const selectedWriters = $('#writer-select').val();
+          const selectedStyles = $('#style-select').val();
+
+          // Get the selected text when the button is clicked
+          google.script.run
+            .withSuccessHandler(function(selectedText) {
+              if (!selectedText || selectedText === 'No text selected') {
+                alert('Please select text in the document.');
+                startSelectionMonitoring();
+                return;
+              }
+
+              // Show loading state
+              $('#sidebar-content').hide();
+              $('#loading').show();
+
+              google.script.run
+                .withSuccessHandler(function(result) {
+                  // Handle the result
+                  showEditSuggestions(result);
+                })
+                .withFailureHandler(function(error) {
+                  console.error('Error:', error);
+                  $('#loading').hide();
+                  $('#sidebar-content').show();
+                  startSelectionMonitoring();
+                })
+                .generateEdit(selectedText, selectedWriters, selectedStyles);
+            })
+            .withFailureHandler(function(error) {
+              console.error('Error getting selected text:', error);
+              startSelectionMonitoring();
+            })
+            .getSelectedText();
+        });
+
+        // Similar modifications for other action buttons
+        $('#rewrite-button').click(function() {
+          stopSelectionMonitoring();
+          // ... handle rewrite action ...
+        });
+
+        $('#continue-button').click(function() {
+          stopSelectionMonitoring();
+          // ... handle continue action ...
+        });
+
+        $('#quotes-button').click(function() {
+          stopSelectionMonitoring();
+          // ... handle find quotes action ...
+        });
+
+        $('#resources-button').click(function() {
+          stopSelectionMonitoring();
+          // ... handle find resources action ...
+        });
       });
 
       function updateSelectedText() {
@@ -118,37 +175,21 @@
           .getSelectedText();
       }
 
-      updateSelectedText();
+      function startSelectionMonitoring() {
+        // Start updating selected text every second
+        updateSelectedText();
+        selectionInterval = setInterval(updateSelectedText, 1000);
+        console.log('Selection monitoring started');
+      }
 
-      $('#edit-button').click(function() {
-        const selectedWriters = $('#writer-select').val();
-        const selectedStyles = $('#style-select').val();
-        const selectedText = $('#selected-text').text();
-        
-        // Show loading state
-        $('#sidebar-content').hide();
-        $('#loading').show();
-        
-        google.script.run
-          .withSuccessHandler(function(result) {
-            if (result.error) {
-              // Handle error
-              console.error(result.error);
-              $('#loading').hide();
-              $('#sidebar-content').show();
-              return;
-            }
-            
-            // Show edit suggestions view
-            showEditSuggestions(result);
-          })
-          .withFailureHandler(function(error) {
-            console.error('Error:', error);
-            $('#loading').hide();
-            $('#sidebar-content').show();
-          })
-          .generateEdit(selectedText, selectedWriters, selectedStyles);
-      });
+      function stopSelectionMonitoring() {
+        // Stop updating selected text
+        if (selectionInterval) {
+          clearInterval(selectionInterval);
+          selectionInterval = null;
+          console.log('Selection monitoring stopped');
+        }
+      }
 
       function showEditSuggestions(result) {
         const editView = `
@@ -179,37 +220,33 @@
             </div>
           </div>
         `;
-        
+
         $('#loading').hide();
         $('#sidebar-content').html(editView).show();
-        
+
         $('#back-button').click(() => {
           location.reload();
+          startSelectionMonitoring();
         });
-        
+
         $('#apply-edits').click(() => {
           const selectedEdits = $('.suggestion-select:checked').map(function() {
             return result.suggestions[$(this).data('index')];
           }).get();
-          
+
           if (selectedEdits.length > 0) {
             google.script.run
-              .withSuccessHandler(() => location.reload())
+              .withSuccessHandler(() => {
+                location.reload();
+                startSelectionMonitoring();
+              })
               .applySelectedEdits(result.originalText, selectedEdits);
           }
         });
       }
 
-      $('#rewrite-button').click(function() {
-        processAction('rewrite');
-      });
-
-      $('#continue-button').click(function() {
-        processAction('continue');
-      });
-
-      // Periodically update selected text
-      setInterval(updateSelectedText, 1000);
+      // If the user navigates back or cancels, resume monitoring
+      // Add any other logic where monitoring should resume
     </script>
   </body>
 </html>

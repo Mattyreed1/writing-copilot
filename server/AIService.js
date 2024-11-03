@@ -5,7 +5,6 @@ var AIService = {
     if (operation === 'edit') {
       return this.generateSpecificEdits(text, writers, styles);
     }
-    var OVERALL_PROMPT = "You are a writing editor with 30 years of experience writing and editing content.";
     var writersString = Array.isArray(writers) && writers.length > 0 ? writers.join(', ') : 'a professional writer';
     var stylesString = Array.isArray(styles) && styles.length > 0 ? styles.join(', ') : 'clear and concise';
     
@@ -77,7 +76,7 @@ var AIService = {
     }
   },
 
-  callOpenAI: function(prompt, model = 'gpt-4', maxTokens = 500) {
+  callOpenAI: function(prompt, model = 'GPT-4o mini', maxTokens = 500) {
     const startTime = new Date();
     
     var url = 'https://api.openai.com/v1/chat/completions';
@@ -92,18 +91,25 @@ var AIService = {
     };
     
     var options = {
-      'method' : 'post',
+      'method': 'post',
       'contentType': 'application/json',
       'headers': {
         'Authorization': 'Bearer ' + this.getOpenAIApiKey()
       },
-      'payload' : JSON.stringify(payload),
+      'payload': JSON.stringify(payload),
       'muteHttpExceptions': true,
       'timeout': 30000 // 30 seconds timeout
     };
     
+    Logger.log('Starting OpenAI API call at ' + startTime);
+
     try {
+      const apiStartTime = new Date();
       var response = UrlFetchApp.fetch(url, options);
+      const apiEndTime = new Date();
+      const apiDuration = (apiEndTime - apiStartTime) / 1000; // in seconds
+      Logger.log('API call duration: ' + apiDuration + ' seconds');
+
       var data = JSON.parse(response.getContentText());
       if (!data.choices || data.choices.length === 0) {
         throw new Error('No response from OpenAI.');
@@ -111,18 +117,21 @@ var AIService = {
       
       // Calculate metadata
       const endTime = new Date();
-      const duration = (endTime - startTime) / 1000; // in seconds
+      const totalDuration = (endTime - startTime) / 1000; // in seconds
       const promptTokens = data.usage.prompt_tokens;
       const completionTokens = data.usage.completion_tokens;
       const totalTokens = data.usage.total_tokens;
       // GPT-4 pricing: $0.03/1K prompt tokens, $0.06/1K completion tokens
       const cost = ((promptTokens * 0.03) + (completionTokens * 0.06)) / 1000;
       
+      Logger.log('Total call duration: ' + totalDuration + ' seconds');
+      
       return {
         content: data.choices[0].message.content.trim(),
         metadata: {
           model: model,
-          duration: duration.toFixed(2),
+          duration: totalDuration.toFixed(2),
+          apiDuration: apiDuration.toFixed(2),
           promptTokens,
           completionTokens,
           totalTokens,
