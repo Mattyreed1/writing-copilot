@@ -84,7 +84,7 @@ var AIService = {
     var payload = {
       'model': model,
       'messages': [
-        {'role': 'system', 'content': 'You are a helpful assistant.'},
+        {'role': 'system', 'content': this.OVERALL_PROMPT},
         {'role': 'user', 'content': prompt}
       ],
       'max_tokens': maxTokens
