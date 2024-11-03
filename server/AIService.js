@@ -54,7 +54,7 @@ var AIService = {
     
     Text to analyze: "${text}"
     
-    Format your response as JSON with this structure:
+    IMPORTANT: Respond with ONLY the raw JSON data, without any markdown formatting or code blocks. Use this exact structure:
     {
       "edits": [
         {
@@ -71,7 +71,9 @@ var AIService = {
       Logger.log('OpenAI API call complete');
       
       Logger.log('Parsing response');
-      const parsedResponse = JSON.parse(response.content);
+      // Remove any potential markdown code block syntax
+      const cleanResponse = response.content.replace(/```json\n?|\n?```/g, '').trim();
+      const parsedResponse = JSON.parse(cleanResponse);
       Logger.log('Response parsed successfully');
       
       return {
