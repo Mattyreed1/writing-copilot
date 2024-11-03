@@ -37,6 +37,8 @@ var AIService = {
   generateSpecificEdits: function(text, writers, styles) {
     const fullContext = this.getDocumentContext();
     
+    Logger.log('Starting generateSpecificEdits');
+    
     const prompt = `As a writing assistant, analyze the following text and suggest specific, targeted improvements. 
     Focus on individual words, phrases, or sentences that could be enhanced.
     For each suggestion, provide:
@@ -64,8 +66,14 @@ var AIService = {
     }`;
 
     try {
+      Logger.log('Calling OpenAI API');
       const response = this.callOpenAI(prompt);
+      Logger.log('OpenAI API call complete');
+      
+      Logger.log('Parsing response');
       const parsedResponse = JSON.parse(response.content);
+      Logger.log('Response parsed successfully');
+      
       return {
         edits: parsedResponse.edits,
         metadata: response.metadata
