@@ -242,21 +242,19 @@
                   // Show brief success message
                   $('#loading .loading-text').text('Changes applied successfully!');
                   
-                  // Wait a moment before redirecting
+                  // Wait a moment before navigating home
                   setTimeout(() => {
-                    // Reset loading text
-                    $('#loading .loading-text').text('Generating suggestions...');
+                    // Clean up event listeners
+                    stopSelectionMonitoring();
                     
-                    // Reload sidebar content
-                    $('#loading').hide();
-                    $('#sidebar-content').empty().load('ui/Sidebar.html', () => {
-                      // Reinitialize the sidebar
-                      startSelectionMonitoring();
-                    });
-                  }, 1500);
+                    // Navigate back to root/home card
+                    CardService.newNavigation().popToRoot();
+                    
+                    // Reinitialize the home card
+                    startSelectionMonitoring();
+                  }, 1000);
                 })
                 .withFailureHandler((error) => {
-                  // Show error message
                   $('#loading').hide();
                   $('#edit-view').show();
                   alert('Failed to apply edits: ' + error);
