@@ -109,7 +109,8 @@ function handleEdit(text, selectedWriters, selectedStyles) {
     const aiResponse = getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
     return {
       originalText: text,
-      suggestions: aiResponse.edits
+      suggestions: aiResponse.edits,
+      metadata: aiResponse.metadata
     };
   } catch (error) {
     Logger.log('Error in handleEdit: ' + error);
