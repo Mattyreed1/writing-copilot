@@ -36,12 +36,17 @@ var AIService = {
   },
 
   generateSpecificEdits: function(text, writers, styles) {
+    const fullContext = this.getDocumentContext();
+    
     const prompt = `As a writing assistant, analyze the following text and suggest specific, targeted improvements. 
     Focus on individual words, phrases, or sentences that could be enhanced.
     For each suggestion, provide:
     1. The original text segment
     2. The suggested improvement
     3. A brief explanation of why this change improves the writing
+    
+    Full Document Context:
+    "${fullContext}"
     
     Writing style preferences: ${styles.join(', ')}
     Writer influences: ${writers.join(', ')}
@@ -61,8 +66,11 @@ var AIService = {
 
     try {
       const response = this.callOpenAI(prompt);
-      const parsedResponse = JSON.parse(response);
-      return parsedResponse;
+      const parsedResponse = JSON.parse(response.content);
+      return {
+        edits: parsedResponse.edits,
+        metadata: response.metadata
+      };
     } catch (error) {
       Logger.log('Error generating specific edits: ' + error);
       throw new Error('Failed to generate edit suggestions');
@@ -70,6 +78,8 @@ var AIService = {
   },
 
   callOpenAI: function(prompt, model = 'gpt-4', maxTokens = 500) {
+    const startTime = new Date();
+    
     var url = 'https://api.openai.com/v1/chat/completions';
     
     var payload = {
@@ -98,7 +108,27 @@ var AIService = {
       if (!data.choices || data.choices.length === 0) {
         throw new Error('No response from OpenAI.');
       }
-      return data.choices[0].message.content.trim();
+      
+      // Calculate metadata
+      const endTime = new Date();
+      const duration = (endTime - startTime) / 1000; // in seconds
+      const promptTokens = data.usage.prompt_tokens;
+      const completionTokens = data.usage.completion_tokens;
+      const totalTokens = data.usage.total_tokens;
+      // GPT-4 pricing: $0.03/1K prompt tokens, $0.06/1K completion tokens
+      const cost = ((promptTokens * 0.03) + (completionTokens * 0.06)) / 1000;
+      
+      return {
+        content: data.choices[0].message.content.trim(),
+        metadata: {
+          model: model,
+          duration: duration.toFixed(2),
+          promptTokens,
+          completionTokens,
+          totalTokens,
+          cost: cost.toFixed(4)
+        }
+      };
     } catch (error) {
       Logger.log('Error calling OpenAI API: ' + error);
       throw new Error('Failed to get a response from OpenAI. Please try again.');
@@ -107,6 +137,27 @@ var AIService = {
 
   getOpenAIApiKey: function() {
     return PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
+  },
+
+  getDocumentContext: function() {
+    try {
+      const doc = DocumentApp.getActiveDocument();
+      const body = doc.getBody();
+      const fullText = body.getText();
+      
+      // If text is very long, truncate to ~8000 characters
+      if (fullText.length > 8000) {
+        const midPoint = Math.floor(fullText.length / 2);
+        const start = midPoint - 4000;
+        const end = midPoint + 4000;
+        return fullText.substring(start, end);
+      }
+      
+      return fullText;
+    } catch (error) {
+      Logger.log('Error getting document context: ' + error);
+      return '';
+    }
   }
 
   // ... other AI-related methods ...

@@ -171,6 +171,12 @@
               `).join('')}
             </div>
             <button id="apply-edits" class="action-button">APPLY SELECTED EDITS</button>
+            <div class="llm-metadata">
+              <div>Model: ${result.metadata.model}</div>
+              <div>Time: ${result.metadata.duration}s</div>
+              <div>Tokens: ${result.metadata.totalTokens} (${result.metadata.promptTokens} prompt, ${result.metadata.completionTokens} completion)</div>
+              <div>Cost: $${result.metadata.cost}</div>
+            </div>
           </div>
         `;
         
