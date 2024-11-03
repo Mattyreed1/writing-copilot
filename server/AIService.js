@@ -76,7 +76,7 @@ var AIService = {
     }
   },
 
-  callOpenAI: function(prompt, model = 'GPT-4o mini', maxTokens = 500) {
+  callOpenAI: function(prompt, model = 'gpt-3.5-turbo', maxTokens = 500) {
     const startTime = new Date();
     
     var url = 'https://api.openai.com/v1/chat/completions';
