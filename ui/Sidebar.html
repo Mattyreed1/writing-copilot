@@ -184,57 +184,93 @@
       }
 
       function showEditSuggestions(result) {
-        const editView = `
-          <div id="edit-view">
-            <div class="header">
-              <button id="back-button">← Back</button>
-              <h2>Suggested Edits</h2>
+        console.log('showEditSuggestions called with:', result);
+        
+        try {
+          console.log('Building edit view HTML');
+          const editView = `
+            <div id="edit-view">
+              <div class="header">
+                <button id="back-button">← Back</button>
+                <h2>Suggested Edits</h2>
+              </div>
+              <div class="suggestions-container">
+                ${result.suggestions.map((suggestion, index) => `
+                  <div class="suggestion-card">
+                    <div class="original-text">Original: "${suggestion.original}"</div>
+                    <div class="suggestion-text">Suggestion: "${suggestion.suggestion}"</div>
+                    <div class="suggestion-explanation">${suggestion.explanation}</div>
+                    <label class="suggestion-select-label">
+                      <input type="checkbox" class="suggestion-select" data-index="${index}">
+                      Apply this edit
+                    </label>
+                  </div>
+                `).join('')}
+              </div>
+              <button id="apply-edits" class="action-button">APPLY SELECTED EDITS</button>
+              <div class="llm-metadata">
+                <div>Model: ${result.metadata.model}</div>
+                <div>Time: ${result.metadata.duration}s</div>
+                <div>Tokens: ${result.metadata.totalTokens} (${result.metadata.promptTokens} prompt, ${result.metadata.completionTokens} completion)</div>
+                <div>Cost: $${result.metadata.cost}</div>
+              </div>
             </div>
-            <div class="suggestions-container">
-              ${result.suggestions.map((suggestion, index) => `
-                <div class="suggestion-card">
-                  <div class="original-text">Original: "${suggestion.original}"</div>
-                  <div class="suggestion-text">Suggestion: "${suggestion.suggestion}"</div>
-                  <div class="suggestion-explanation">${suggestion.explanation}</div>
-                  <label class="suggestion-select-label">
-                    <input type="checkbox" class="suggestion-select" data-index="${index}">
-                    Apply this edit
-                  </label>
-                </div>
-              `).join('')}
-            </div>
-            <button id="apply-edits" class="action-button">APPLY SELECTED EDITS</button>
-            <div class="llm-metadata">
-              <div>Model: ${result.metadata.model}</div>
-              <div>Time: ${result.metadata.duration}s</div>
-              <div>Tokens: ${result.metadata.totalTokens} (${result.metadata.promptTokens} prompt, ${result.metadata.completionTokens} completion)</div>
-              <div>Cost: $${result.metadata.cost}</div>
-            </div>
-          </div>
-        `;
+          `;
 
-        $('#loading').hide();
-        $('#sidebar-content').html(editView).show();
+          console.log('Inserting edit view into DOM');
+          $('#loading').hide();
+          $('#sidebar-content').html(editView).show();
+          console.log('Setting up event handlers');
 
-        $('#back-button').click(() => {
-          location.reload();
-          startSelectionMonitoring();
-        });
+          $('#back-button').click(() => {
+            location.reload();
+            startSelectionMonitoring();
+          });
 
-        $('#apply-edits').click(() => {
-          const selectedEdits = $('.suggestion-select:checked').map(function() {
-            return result.suggestions[$(this).data('index')];
-          }).get();
+          $('#apply-edits').click(() => {
+            const selectedEdits = $('.suggestion-select:checked').map(function() {
+              return result.suggestions[$(this).data('index')];
+            }).get();
 
-          if (selectedEdits.length > 0) {
-            google.script.run
-              .withSuccessHandler(() => {
-                location.reload();
-                startSelectionMonitoring();
-              })
-              .applySelectedEdits(result.originalText, selectedEdits);
-          }
-        });
+            if (selectedEdits.length > 0) {
+              // Show loading state
+              $('#edit-view').hide();
+              $('#loading').show();
+              
+              google.script.run
+                .withSuccessHandler(() => {
+                  // Show brief success message
+                  $('#loading .loading-text').text('Changes applied successfully!');
+                  
+                  // Wait a moment before redirecting
+                  setTimeout(() => {
+                    // Reset loading text
+                    $('#loading .loading-text').text('Generating suggestions...');
+                    
+                    // Reload sidebar content
+                    $('#loading').hide();
+                    $('#sidebar-content').empty().load('ui/Sidebar.html', () => {
+                      // Reinitialize the sidebar
+                      startSelectionMonitoring();
+                    });
+                  }, 1500);
+                })
+                .withFailureHandler((error) => {
+                  // Show error message
+                  $('#loading').hide();
+                  $('#edit-view').show();
+                  alert('Failed to apply edits: ' + error);
+                })
+                .applySelectedEdits(result.originalText, selectedEdits);
+            }
+          });
+        } catch (error) {
+          console.error('Error in showEditSuggestions:', error);
+          $('#loading').hide();
+          $('#sidebar-content')
+            .html('<div class="error">Error displaying suggestions. Please try again.</div>')
+            .show();
+        }
       }
 
       // If the user navigates back or cancels, resume monitoring

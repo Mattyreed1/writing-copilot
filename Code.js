@@ -98,20 +98,27 @@ function include(filename) {
 
 function handleEdit(text, selectedWriters, selectedStyles) {
   if (!text || text === 'No text selected') {
+    Logger.log('handleEdit: No text selected');
     return { error: 'No text selected' };
   }
   
   if (!selectedWriters || !selectedStyles) {
+    Logger.log('handleEdit: Missing styles');
     return { error: 'Please select writing styles' };
   }
 
   try {
+    Logger.log('handleEdit: Calling getAISuggestions');
     const aiResponse = getAISuggestions(text, selectedWriters, selectedStyles, 'edit');
-    return {
+    Logger.log('handleEdit: Got AI response: ' + JSON.stringify(aiResponse));
+    
+    const result = {
       originalText: text,
       suggestions: aiResponse.edits,
       metadata: aiResponse.metadata
     };
+    Logger.log('handleEdit: Returning result: ' + JSON.stringify(result));
+    return result;
   } catch (error) {
     Logger.log('Error in handleEdit: ' + error);
     return { error: 'Failed to generate suggestions' };
