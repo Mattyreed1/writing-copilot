@@ -117,7 +117,7 @@ function handleEdit(text, selectedWriters, selectedStyles) {
       suggestions: aiResponse.edits,
       metadata: aiResponse.metadata
     };
-    Logger.log('handleEdit: Returning result: ' + JSON.stringify(result));
+    // Logger.log('handleEdit: Returning result: ' + JSON.stringify(result));
     return result;
   } catch (error) {
     Logger.log('Error in handleEdit: ' + error);
