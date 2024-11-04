@@ -242,17 +242,11 @@
                   // Show brief success message
                   $('#loading .loading-text').text('Changes applied successfully!');
                   
-                  // Wait a moment before navigating home
+                  // Wait a moment before reloading
                   setTimeout(() => {
-                    // Clean up event listeners
-                    stopSelectionMonitoring();
-                    
-                    // Navigate back to root/home card
-                    CardService.newNavigation().popToRoot();
-                    
-                    // Reinitialize the home card
-                    startSelectionMonitoring();
-                  }, 1000);
+                    // Reload the entire sidebar
+                    google.script.run.showSidebar();
+                  }, 1500);
                 })
                 .withFailureHandler((error) => {
                   $('#loading').hide();
